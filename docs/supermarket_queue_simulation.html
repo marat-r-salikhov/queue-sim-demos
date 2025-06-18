@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket Cashier Simulation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 2000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        .simulation-area {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .control-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        .control-group h3 {
+            margin-top: 0;
+            color: #495057;
+            font-size: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        .value-display {
+            text-align: right;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+            align-items: start;
+        }
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .chart-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            position: relative;
+            height: 300px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Supermarket Cashier Simulation</h1>
+        <p class="subtitle">Understanding Queue Dynamics in Service Operations</p>
+        
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="simulation-area">
+                    <canvas id="simCanvas" width="1140" height="300"></canvas>
+                </div>
+                
+                <div class="button-group">
+                    <button onclick="toggleSimulation()" id="toggleBtn">▶️ Start Simulation</button>
+                    <button onclick="resetSimulation()">🔄 Reset</button>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Average Queue Length (L)</div>
+                        <div class="stat-value" id="avgQueueLength">0.0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Arrival Rate (λ)</div>
+                        <div class="stat-value" id="arrivalRate">0.0 /s</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Average Wait Time (W)</div>
+                        <div class="stat-value" id="avgWaitTime">0.0 s</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Server Utilization</div>
+                        <div class="stat-value" id="utilization">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Average Service Time</div>
+                        <div class="stat-value" id="avgServiceTime">0.0 s</div>
+                    </div>
+                </div>
+                
+                <div class="charts">
+                    <div class="chart-container">
+                        <canvas id="queueChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="waitChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="charts" style="margin-top: 20px;">
+                    <div class="chart-container">
+                        <canvas id="arrivalRateChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="utilizationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="controls">
+                    <div class="control-group">
+                        <h3>Customers</h3>
+                        <label for="arrivalMean">Mean Time Between Arrivals (seconds)</label>
+                        <input type="range" id="arrivalMean" min="1" max="10" step="0.1" value="2">
+                        <div class="value-display" id="arrivalMeanValue">2.0 s</div>
+                        
+                        <label for="arrivalCV">Arrival Time Variability (CV)</label>
+                        <input type="range" id="arrivalCV" min="0.1" max="2" step="0.1" value="0.1">
+                        <div class="value-display" id="arrivalCVValue">0.1</div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Cashier</h3>
+                        <label for="serviceMean">Mean Service Time (seconds)</label>
+                        <input type="range" id="serviceMean" min="1" max="10" step="0.1" value="1.8">
+                        <div class="value-display" id="serviceMeanValue">1.8 s</div>
+                        
+                        <label for="serviceCV">Service Time Variability (CV)</label>
+                        <input type="range" id="serviceCV" min="0.1" max="2" step="0.1" value="0.1">
+                        <div class="value-display" id="serviceCVValue">0.1</div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Random Seed</h3>
+                        <label for="randomSeed">Seed (for reproducible results)</label>
+                        <input type="number" id="randomSeed" min="1" max="999999" value="12345" style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                        <div style="margin-top: 10px;">
+                            <button onclick="applySeed()" style="width: 100%;">Apply Seed</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Seeded random number generator
+        let seed = 12345; // Default seed
+        
+        function seededRandom() {
+            seed = (seed * 9301 + 49297) % 233280;
+            return seed / 233280;
+        }
+        
+        function setSeed(newSeed) {
+            seed = newSeed;
+        }
+        
+        // Simulation state
+        let running = false;
+        let simulationTime = 0;
+        let lastFrameTime = 0;
+        let customers = [];
+        let queue = [];
+        let server = null;
+        let nextArrivalTime = 0;
+        let customerId = 0;
+        
+        // Statistics
+        let stats = {
+            totalWaitTime: 0,
+            totalQueueLength: 0,
+            totalServiceTime: 0,
+            totalIndividualServiceTime: 0,
+            customersServed: 0,
+            customersArrived: 0,
+            measurements: 0
+        };
+        
+        // Time series data for charts
+        let queueData = [];
+        let waitData = [];
+        let arrivalRateChartData = [];
+        let utilizationData = [];
+        const maxDataPoints = 100;
+        
+        // Canvas setup
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Position constants
+        const ENTRANCE_X = 50;
+        const QUEUE_START_X = 300;
+        const SERVER_X = 700;
+        const EXIT_X = 1090;
+        const FLOOR_Y = 250;
+        const CUSTOMER_SPACING = 60;
+        
+        // Gamma distribution random number generator
+        function gammaRandom(shape, scale) {
+            // Using Marsaglia and Tsang method
+            if (shape < 1) {
+                return gammaRandom(shape + 1, scale) * Math.pow(seededRandom(), 1/shape);
+            }
+            
+            const d = shape - 1/3;
+            const c = 1/Math.sqrt(9 * d);
+            
+            while (true) {
+                let x, v;
+                do {
+                    x = gaussianRandom();
+                    v = 1 + c * x;
+                } while (v <= 0);
+                
+                v = v * v * v;
+                const u = seededRandom();
+                
+                if (u < 1 - 0.0331 * x * x * x * x) {
+                    return d * v * scale;
+                }
+                
+                if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) {
+                    return d * v * scale;
+                }
+            }
+        }
+        
+        function gaussianRandom() {
+            let u = 0, v = 0;
+            while (u === 0) u = seededRandom();
+            while (v === 0) v = seededRandom();
+            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+        
+        // Get distribution parameters from CV
+        function getGammaParams(mean, cv) {
+            const shape = 1 / (cv * cv);
+            const scale = mean / shape;
+            return { shape, scale };
+        }
+        
+        // Test function to verify Gamma distribution parameters (for debugging)
+        function testGammaDistribution(mean, cv, samples = 10000) {
+            const params = getGammaParams(mean, cv);
+            let sum = 0;
+            let sumSquared = 0;
+            
+            for (let i = 0; i < samples; i++) {
+                const value = gammaRandom(params.shape, params.scale);
+                sum += value;
+                sumSquared += value * value;
+            }
+            
+            const sampleMean = sum / samples;
+            const sampleVariance = (sumSquared / samples) - (sampleMean * sampleMean);
+            const sampleStdDev = Math.sqrt(sampleVariance);
+            const sampleCV = sampleStdDev / sampleMean;
+            
+            console.log(`Target: mean=${mean}, CV=${cv}`);
+            console.log(`Sample: mean=${sampleMean.toFixed(3)}, CV=${sampleCV.toFixed(3)}`);
+            console.log(`Params: shape=${params.shape.toFixed(3)}, scale=${params.scale.toFixed(3)}`);
+            
+            return { sampleMean, sampleCV };
+        }
+        
+        // Customer class
+        class Customer {
+            constructor(id) {
+                this.id = id;
+                this.x = ENTRANCE_X;
+                this.y = FLOOR_Y;
+                this.state = 'arriving'; // arriving, queuing, being_served, leaving
+                this.arrivalTime = simulationTime;
+                this.serviceStartTime = null;
+                this.targetX = ENTRANCE_X; // Will be updated when added to queue
+                this.queuePosition = -1;
+                this.walkSpeed = 8;
+                this.animationPhase = 0;
+            }
+            
+            update(deltaTime) {
+                this.animationPhase += deltaTime * 2;
+                
+                switch (this.state) {
+                    case 'arriving':
+                    case 'leaving':
+                        if (Math.abs(this.x - this.targetX) > this.walkSpeed) {
+                            this.x += this.x < this.targetX ? this.walkSpeed : -this.walkSpeed;
+                        } else {
+                            this.x = this.targetX;
+                            if (this.state === 'arriving') {
+                                this.state = 'queuing';
+                            } else if (this.state === 'leaving' && this.x >= EXIT_X) {
+                                return false; // Remove customer
+                            }
+                        }
+                        break;
+                    case 'queuing':
+                        // Queue from right to left: position 0 closest to cashier
+                        const queueTargetX = SERVER_X - 100 - this.queuePosition * CUSTOMER_SPACING;
+                        if (Math.abs(this.x - queueTargetX) > this.walkSpeed) {
+                            this.x += this.x < queueTargetX ? this.walkSpeed : -this.walkSpeed;
+                        } else {
+                            this.x = queueTargetX;
+                        }
+                        break;
+                    case 'being_served':
+                        if (Math.abs(this.x - SERVER_X) > this.walkSpeed) {
+                            this.x += this.x < SERVER_X ? this.walkSpeed : -this.walkSpeed;
+                        } else {
+                            this.x = SERVER_X;
+                        }
+                        break;
+                }
+                return true;
+            }
+            
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                
+                // Simple stick figure
+                const bobAmount = this.state === 'arriving' || this.state === 'leaving' ? 
+                    Math.sin(this.animationPhase) * 2 : 0;
+                
+                ctx.strokeStyle = '#34495e';
+                ctx.lineWidth = 2;
+                ctx.fillStyle = '#34495e';
+                
+                // Head
+                ctx.beginPath();
+                ctx.arc(0, -35 + bobAmount, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Body
+                ctx.beginPath();
+                ctx.moveTo(0, -27 + bobAmount);
+                ctx.lineTo(0, -5 + bobAmount);
+                ctx.stroke();
+                
+                // Arms
+                ctx.beginPath();
+                ctx.moveTo(-8, -20 + bobAmount);
+                ctx.lineTo(0, -20 + bobAmount);
+                ctx.lineTo(8, -20 + bobAmount);
+                ctx.stroke();
+                
+                // Legs
+                const legPhase = this.state === 'arriving' || this.state === 'leaving' ? 
+                    Math.sin(this.animationPhase * 2) * 5 : 0;
+                ctx.beginPath();
+                ctx.moveTo(0, -5 + bobAmount);
+                ctx.lineTo(-5 + legPhase, 0);
+                ctx.moveTo(0, -5 + bobAmount);
+                ctx.lineTo(5 - legPhase, 0);
+                ctx.stroke();
+                
+                // Draw customer ID number above head
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(this.id.toString(), 0, -50 + bobAmount);
+                
+                ctx.restore();
+            }
+        }
+        
+        // Initialize charts
+        const queueChart = new Chart(document.getElementById('queueChart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Queue Length',
+                    data: [],
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Queue Length Over Time'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time (seconds)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Number of Customers'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        const waitChart = new Chart(document.getElementById('waitChart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Average Wait Time',
+                    data: [],
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Average Wait Time Over Time'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time (seconds)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Wait Time (seconds)'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        const arrivalRateChart = new Chart(document.getElementById('arrivalRateChart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Arrival Rate',
+                    data: [],
+                    borderColor: '#f39c12',
+                    backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Customer Arrival Rate Over Time'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time (seconds)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Arrivals per Second'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        const utilizationChart = new Chart(document.getElementById('utilizationChart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Server Utilization',
+                    data: [],
+                    borderColor: '#9b59b6',
+                    backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Server Utilization Over Time'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time (seconds)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Utilization (%)'
+                        },
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+        
+        // Update controls
+        document.getElementById('arrivalMean').addEventListener('input', function() {
+            document.getElementById('arrivalMeanValue').textContent = this.value + ' s';
+        });
+        
+        document.getElementById('arrivalCV').addEventListener('input', function() {
+            document.getElementById('arrivalCVValue').textContent = this.value;
+        });
+        
+        document.getElementById('serviceMean').addEventListener('input', function() {
+            document.getElementById('serviceMeanValue').textContent = this.value + ' s';
+        });
+        
+        document.getElementById('serviceCV').addEventListener('input', function() {
+            document.getElementById('serviceCVValue').textContent = this.value;
+        });
+        
+        // Simulation control functions
+        function toggleSimulation() {
+            running = !running;
+            const toggleBtn = document.getElementById('toggleBtn');
+            
+            if (running) {
+                toggleBtn.textContent = '⏸️ Stop Simulation';
+                lastFrameTime = performance.now();
+                requestAnimationFrame(animate);
+            } else {
+                toggleBtn.textContent = '▶️ Start Simulation';
+            }
+        }
+        
+        function resetSimulation() {
+            running = false;
+            simulationTime = 0;
+            lastFrameTime = 0;
+            customers = [];
+            queue = [];
+            server = null;
+            nextArrivalTime = 0;
+            customerId = 0;
+            
+            // Reset seed to the current input value
+            const seedValue = parseInt(document.getElementById('randomSeed').value);
+            setSeed(seedValue);
+            
+            stats = {
+                totalWaitTime: 0,
+                totalQueueLength: 0,
+                totalServiceTime: 0,
+                totalIndividualServiceTime: 0,
+                customersServed: 0,
+                customersArrived: 0,
+                measurements: 0
+            };
+            
+            queueData = [];
+            waitData = [];
+            arrivalRateChartData = [];
+            utilizationData = [];
+            
+            // Reset button state
+            document.getElementById('toggleBtn').textContent = '▶️ Start Simulation';
+            
+            updateStats();
+            updateCharts();
+            draw();
+        }
+        
+        function applySeed() {
+            const seedValue = parseInt(document.getElementById('randomSeed').value);
+            setSeed(seedValue);
+            console.log('Random seed set to:', seedValue);
+        }
+        
+        // Generate next arrival
+        function generateNextArrival() {
+            const arrivalMean = parseFloat(document.getElementById('arrivalMean').value);
+            const arrivalCV = parseFloat(document.getElementById('arrivalCV').value);
+            const params = getGammaParams(arrivalMean, arrivalCV);
+            const interarrivalTime = gammaRandom(params.shape, params.scale);
+            nextArrivalTime = simulationTime + interarrivalTime;
+        }
+        
+        // Process queue - handles ALL logical state transitions immediately
+        function processQueue() {
+            if (server === null && queue.length > 0) {
+                const customer = queue.shift();
+                server = customer;
+                customer.state = 'being_served';
+                
+                // LOGICAL SERVICE STARTS IMMEDIATELY (not when customer reaches cashier visually)
+                customer.serviceStartTime = simulationTime;
+                
+                // Calculate wait time immediately (time spent in logical queue only)
+                const waitTime = simulationTime - customer.arrivalTime;
+                stats.totalWaitTime += waitTime;
+                
+                // Debug logging for verification
+                console.log(`Customer ${customer.id} served: arrived=${customer.arrivalTime.toFixed(2)}s, served=${simulationTime.toFixed(2)}s, wait=${waitTime.toFixed(2)}s, queue_was=${queue.length + 1}`);
+                
+                // Generate service time and schedule completion
+                const serviceMean = parseFloat(document.getElementById('serviceMean').value);
+                const serviceCV = parseFloat(document.getElementById('serviceCV').value);
+                const params = getGammaParams(serviceMean, serviceCV);
+                const serviceTime = gammaRandom(params.shape, params.scale);
+                customer.serviceEndTime = simulationTime + serviceTime;
+                
+                // Update visual targets for remaining queue
+                queue.forEach((c, i) => {
+                    c.queuePosition = i;
+                    if (c.state === 'queuing') {
+                        c.targetX = SERVER_X - 100 - i * CUSTOMER_SPACING;
+                    }
+                });
+            }
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const avgQueue = stats.measurements > 0 ? 
+                (stats.totalQueueLength / stats.measurements).toFixed(1) : '0.0';
+            const avgWait = stats.customersServed > 0 ? 
+                (stats.totalWaitTime / stats.customersServed).toFixed(1) : '0.0';
+            const arrivalRate = simulationTime > 0 ? 
+                (stats.customersArrived / simulationTime).toFixed(3) : '0.000';
+            const avgServiceTime = stats.customersServed > 0 ? 
+                (stats.totalIndividualServiceTime / stats.customersServed).toFixed(1) : '0.0';
+            const utilization = stats.measurements > 0 ? 
+                ((stats.totalServiceTime / simulationTime) * 100).toFixed(0) : '0';
+            
+            document.getElementById('avgQueueLength').textContent = avgQueue;
+            document.getElementById('arrivalRate').textContent = arrivalRate + ' /s';
+            document.getElementById('avgWaitTime').textContent = avgWait + ' s';
+            document.getElementById('avgServiceTime').textContent = avgServiceTime + ' s';
+            document.getElementById('utilization').textContent = utilization + '%';
+        }
+        
+        // Update charts
+        function updateCharts() {
+            if (queueData.length > maxDataPoints) {
+                queueData.shift();
+                waitData.shift();
+                arrivalRateChartData.shift();
+                utilizationData.shift();
+            }
+            
+            queueData.push({
+                x: simulationTime.toFixed(1),
+                y: queue.length
+            });
+            
+            const currentAvgWait = stats.customersServed > 0 ? 
+                stats.totalWaitTime / stats.customersServed : 0;
+            waitData.push({
+                x: simulationTime.toFixed(1),
+                y: currentAvgWait
+            });
+            
+            const currentArrivalRate = simulationTime > 0 ? 
+                (stats.customersArrived / simulationTime) : 0;
+            arrivalRateChartData.push({
+                x: simulationTime.toFixed(1),
+                y: currentArrivalRate
+            });
+            
+            const currentUtilization = simulationTime > 0 ? 
+                ((stats.totalServiceTime / simulationTime) * 100) : 0;
+            utilizationData.push({
+                x: simulationTime.toFixed(1),
+                y: currentUtilization
+            });
+            
+            queueChart.data.labels = queueData.map(d => d.x);
+            queueChart.data.datasets[0].data = queueData.map(d => d.y);
+            queueChart.update('none');
+            
+            waitChart.data.labels = waitData.map(d => d.x);
+            waitChart.data.datasets[0].data = waitData.map(d => d.y);
+            waitChart.update('none');
+            
+            arrivalRateChart.data.labels = arrivalRateChartData.map(d => d.x);
+            arrivalRateChart.data.datasets[0].data = arrivalRateChartData.map(d => d.y);
+            arrivalRateChart.update('none');
+            
+            utilizationChart.data.labels = utilizationData.map(d => d.x);
+            utilizationChart.data.datasets[0].data = utilizationData.map(d => d.y);
+            utilizationChart.update('none');
+        }
+        
+        // Draw scene
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw floor
+            ctx.strokeStyle = '#bdc3c7';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, FLOOR_Y);
+            ctx.lineTo(canvas.width, FLOOR_Y);
+            ctx.stroke();
+            
+            // Draw entrance
+            ctx.fillStyle = '#27ae60';
+            ctx.fillRect(ENTRANCE_X - 20, FLOOR_Y - 60, 40, 60);
+            ctx.fillStyle = 'white';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('ENTER', ENTRANCE_X, FLOOR_Y - 30);
+            
+            // Draw queue area (right to left from cashier)
+            ctx.strokeStyle = '#3498db';
+            ctx.setLineDash([5, 5]);
+            const queueAreaLeft = SERVER_X - 450;
+            const queueAreaWidth = 350;
+            ctx.strokeRect(queueAreaLeft, FLOOR_Y - 80, queueAreaWidth, 80);
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#3498db';
+            ctx.font = '14px sans-serif';
+            ctx.fillText('QUEUE', queueAreaLeft + queueAreaWidth/2, FLOOR_Y - 90);
+            
+            // Draw cashier counter and register
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(SERVER_X - 35, FLOOR_Y - 30, 70, 30);
+            
+            // Draw cash register
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(SERVER_X - 15, FLOOR_Y - 45, 30, 15);
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(SERVER_X - 12, FLOOR_Y - 42, 24, 9);
+            
+            // Draw cashier person
+            ctx.save();
+            ctx.translate(SERVER_X, FLOOR_Y - 30);
+            
+            // Cashier head
+            ctx.fillStyle = '#f4c2a1';
+            ctx.beginPath();
+            ctx.arc(0, -35, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Cashier hair
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.arc(0, -38, 12, Math.PI, 0);
+            ctx.fill();
+            
+            // Cashier uniform (shirt)
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(-12, -25, 24, 20);
+            
+            // Cashier arms
+            ctx.fillStyle = '#f4c2a1';
+            ctx.fillRect(-18, -20, 6, 15);
+            ctx.fillRect(12, -20, 6, 15);
+            
+            // Cashier hands
+            ctx.beginPath();
+            ctx.arc(-15, -12, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(15, -12, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+            
+            // Draw service progress bar if customer is being served and has reached the cashier
+            if (server && Math.abs(server.x - SERVER_X) <= 2) {
+                const progressBarWidth = 50;
+                const progressBarHeight = 4;
+                const progressBarX = SERVER_X - progressBarWidth / 2;
+                const progressBarY = FLOOR_Y - 95;
+                
+                // Calculate progress (0 to 1)
+                const serviceProgress = Math.min(1, (simulationTime - server.serviceStartTime) / (server.serviceEndTime - server.serviceStartTime));
+                
+                // Draw progress bar background
+                ctx.fillStyle = '#bdc3c7';
+                ctx.fillRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight);
+                
+                // Draw progress bar fill
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(progressBarX, progressBarY, progressBarWidth * serviceProgress, progressBarHeight);
+                
+                // Draw progress bar border
+                ctx.strokeStyle = '#95a5a6';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight);
+            }
+            
+            // Draw exit
+            ctx.fillStyle = '#e67e22';
+            ctx.fillRect(EXIT_X - 20, FLOOR_Y - 60, 40, 60);
+            ctx.fillStyle = 'white';
+            ctx.fillText('EXIT', EXIT_X, FLOOR_Y - 30);
+            
+            // Draw customers
+            customers.forEach(customer => customer.draw());
+        }
+        
+        // Animation loop
+        function animate(currentTime) {
+            if (!running) return;
+            
+            const deltaTime = (currentTime - lastFrameTime) / 1000; // Convert to seconds
+            lastFrameTime = currentTime;
+            simulationTime += deltaTime;
+            
+            // Check for new arrivals
+            if (simulationTime >= nextArrivalTime) {
+                const newCustomer = new Customer(customerId++);
+                customers.push(newCustomer);
+                queue.push(newCustomer);
+                newCustomer.queuePosition = queue.length - 1;
+                // Set target to their queue position (end of queue, leftmost)
+                newCustomer.targetX = SERVER_X - 100 - newCustomer.queuePosition * CUSTOMER_SPACING;
+                stats.customersArrived++;
+                generateNextArrival();
+            }
+            
+            // Check for completed services (logical state only)
+            if (server && server.serviceEndTime && simulationTime >= server.serviceEndTime) {
+                // Service is complete - update statistics
+                server.state = 'leaving';
+                server.targetX = EXIT_X;
+                stats.customersServed++;
+                const serviceTime = simulationTime - server.serviceStartTime;
+                stats.totalServiceTime += serviceTime;
+                stats.totalIndividualServiceTime += serviceTime;
+                server = null;
+            }
+            
+            // Process queue
+            processQueue();
+            
+            // Update customers
+            customers = customers.filter(customer => customer.update(deltaTime));
+            
+            // Update statistics - use LOGICAL queue length only
+            // Queue length is simply the number of customers waiting (not being served)
+            const logicalQueueLength = queue.length;
+            stats.totalQueueLength += logicalQueueLength * deltaTime;
+            stats.measurements += deltaTime;
+            
+            // Update displays periodically
+            if (Math.floor(simulationTime) !== Math.floor(simulationTime - deltaTime)) {
+                updateStats();
+                updateCharts();
+            }
+            
+            draw();
+            requestAnimationFrame(animate);
+        }
+        
+        // Initialize
+        generateNextArrival();
+        draw();
+        
+        // Test Gamma distribution (check browser console)
+        console.log("Testing Gamma distribution implementation:");
+        testGammaDistribution(3.0, 1.0);  // Test with mean=3, CV=1
+        testGammaDistribution(2.5, 0.5);  // Test with mean=2.5, CV=0.5
+        testGammaDistribution(4.0, 1.5);  // Test with mean=4, CV=1.5
+        
+        // Verify queue logic fix
+        console.log("\n=== QUEUE LOGIC VERIFICATION ===");
+        console.log("Key fixes implemented:");
+        console.log("1. Wait time = service start time - arrival time (no visual delay)");
+        console.log("2. Queue length = logical queue only (excludes customer being served)");
+        console.log("3. Service starts immediately when customer is selected from queue");
+        console.log("4. Statistics are decoupled from visual animation");
+        console.log("Watch the console for 'Customer X served' messages to verify correct wait times.");
+        console.log("If cashier is free and customer arrives, wait time should be 0.0s!");
+    </script>
+</body>
+</html>
