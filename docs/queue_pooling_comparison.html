@@ -233,12 +233,12 @@
                     <div class="control-group">
                         <h3>Customer Arrivals</h3>
                         <label for="arrivalMean">Mean Time Between Arrivals (seconds)</label>
-                        <input type="range" id="arrivalMean" min="1" max="10" step="0.1" value="1.1">
-                        <div class="value-display" id="arrivalMeanValue">1.1 s</div>
+                        <input type="range" id="arrivalMean" min="1" max="10" step="0.1" value="1.5">
+                        <div class="value-display" id="arrivalMeanValue">1.5 s</div>
                         
                         <label for="arrivalCV">Arrival Variability (CV)</label>
-                        <input type="range" id="arrivalCV" min="0.1" max="2" step="0.1" value="2">
-                        <div class="value-display" id="arrivalCVValue">2.0</div>
+                        <input type="range" id="arrivalCV" min="0.1" max="2" step="0.1" value="1">
+                        <div class="value-display" id="arrivalCVValue">1.0</div>
                     </div>
                     
                     <div class="control-group">
@@ -248,8 +248,8 @@
                         <div class="value-display" id="serviceMeanValue">1.0 s</div>
                         
                         <label for="serviceCV">Service Variability (CV)</label>
-                        <input type="range" id="serviceCV" min="0.1" max="2" step="0.1" value="2">
-                        <div class="value-display" id="serviceCVValue">2.0</div>
+                        <input type="range" id="serviceCV" min="0.1" max="2" step="0.1" value="1">
+                        <div class="value-display" id="serviceCVValue">1.0</div>
                     </div>
                     
                     <div class="control-group">
@@ -279,6 +279,12 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <tr>
+                                    <td class="metric-name">Average Queue Length</td>
+                                    <td class="metric-value" id="separateQueueLength">0.0</td>
+                                    <td class="metric-value" id="pooledQueueLength">0.0</td>
+                                    <td class="improvement neutral" id="queueImprovement">-</td>
+                                </tr>
                                 <tr>
                                     <td class="metric-name">Average Wait Time</td>
                                     <td class="metric-value" id="separateWaitTime">0.0 s</td>
@@ -414,8 +420,7 @@
                 this.state = 'arriving';
                 this.arrivalTime = simulationTime;
                 this.queueJoinTime = null;
-                this.serviceStartTime = null; // Logical service start (for statistics)
-                this.visualServiceStartTime = null; // Visual service start (for progress bar)
+                this.serviceStartTime = null;
                 this.targetX = ENTRANCE_X;
                 this.targetY = FLOOR_Y;
                 this.queuePosition = -1;
@@ -557,60 +562,23 @@
                 const queueIndex = chooseQueue();
                 const separateCustomer = new Customer(arrival.id, 'separate', queueIndex);
                 separateCustomers.push(separateCustomer);
+                separateQueues[queueIndex].push(separateCustomer);
+                separateCustomer.queuePosition = separateQueues[queueIndex].length - 1;
                 
-                // FIX: Check if server is immediately available (zero wait time case)
-                if (separateServers[queueIndex] === null) {
-                    // Direct to server with zero wait time
-                    separateServers[queueIndex] = separateCustomer;
-                    separateCustomer.state = 'walking_to_server';
-                    separateCustomer.serverIndex = queueIndex;
-                    separateCustomer.targetX = queueIndex === 0 ? SERVER1_X : SERVER2_X;
-                    separateCustomer.targetY = queueIndex === 0 ? FLOOR_Y - QUEUE_Y_OFFSET : FLOOR_Y;
-                    separateCustomer.serviceStartTime = simulationTime;
-                    separateCustomer.queueJoinTime = simulationTime; // Immediate service
-                    // Zero wait time recorded
-                    separateStats.totalWaitTime += 0;
-                } else {
-                    // Join queue
-                    separateQueues[queueIndex].push(separateCustomer);
-                    separateCustomer.queuePosition = separateQueues[queueIndex].length - 1;
-                    const queueY = FLOOR_Y + (queueIndex === 0 ? -QUEUE_Y_OFFSET : 0);
-                    const serverX = queueIndex === 0 ? SERVER1_X : SERVER2_X;
-                    separateCustomer.targetX = serverX - 180 - separateCustomer.queuePosition * CUSTOMER_SPACING;
-                    separateCustomer.targetY = queueY;
-                }
+                // Set target position for separate system (position 0 closest to server)
+                const queueY = FLOOR_Y + (queueIndex === 0 ? -QUEUE_Y_OFFSET : 0);
+                const serverX = queueIndex === 0 ? SERVER1_X : SERVER2_X;
+                separateCustomer.targetX = serverX - 180 - separateCustomer.queuePosition * CUSTOMER_SPACING;
+                separateCustomer.targetY = queueY;
                 
                 // Create customer for pooled system
                 const pooledCustomer = new Customer(arrival.id, 'pooled');
                 pooledCustomers.push(pooledCustomer);
-                
-                // FIX: Check if any server is immediately available (zero wait time case)
-                let availableServerIndex = -1;
-                for (let i = 0; i < 2; i++) {
-                    if (pooledServers[i] === null) {
-                        availableServerIndex = i;
-                        break;
-                    }
-                }
-                
-                if (availableServerIndex !== -1) {
-                    // Direct to server with zero wait time
-                    pooledServers[availableServerIndex] = pooledCustomer;
-                    pooledCustomer.state = 'walking_to_server';
-                    pooledCustomer.serverIndex = availableServerIndex;
-                    pooledCustomer.targetX = availableServerIndex === 0 ? SERVER1_X : SERVER2_X;
-                    pooledCustomer.targetY = FLOOR_Y;
-                    pooledCustomer.serviceStartTime = simulationTime;
-                    pooledCustomer.queueJoinTime = simulationTime; // Immediate service
-                    // Zero wait time recorded
-                    pooledStats.totalWaitTime += 0;
-                } else {
-                    // Join queue
-                    pooledQueue.push(pooledCustomer);
-                    pooledCustomer.queuePosition = pooledQueue.length - 1;
-                    const averageServerX = (SERVER1_X + SERVER2_X) / 2;
-                    pooledCustomer.targetX = averageServerX - 180 - pooledCustomer.queuePosition * CUSTOMER_SPACING;
-                }
+                pooledQueue.push(pooledCustomer);
+                pooledCustomer.queuePosition = pooledQueue.length - 1;
+                // Position 0 closest to servers (average position between both servers)
+                const averageServerX = (SERVER1_X + SERVER2_X) / 2;
+                pooledCustomer.targetX = averageServerX - 180 - pooledCustomer.queuePosition * CUSTOMER_SPACING;
                 
                 customerId++;
                 separateStats.customersArrived = customerId;
@@ -628,14 +596,6 @@
                     customer.serverIndex = i;
                     customer.targetX = i === 0 ? SERVER1_X : SERVER2_X;
                     customer.targetY = i === 0 ? FLOOR_Y - QUEUE_Y_OFFSET : FLOOR_Y;
-                    
-                    // FIX: Calculate wait time at the moment customer is assigned to server
-                    // This is when their wait truly ends, not when they physically reach the server
-                    customer.serviceStartTime = simulationTime;
-                    if (customer.queueJoinTime !== null) {
-                        const waitTime = simulationTime - customer.queueJoinTime;
-                        separateStats.totalWaitTime += waitTime;
-                    }
                     
                     // Update remaining queue positions (position 0 closest to server)
                     separateQueues[i].forEach((c, index) => {
@@ -660,14 +620,6 @@
                     customer.targetX = i === 0 ? SERVER1_X : SERVER2_X;
                     customer.targetY = FLOOR_Y;
                     
-                    // FIX: Calculate wait time at the moment customer is assigned to server
-                    // This is when their wait truly ends, not when they physically reach the server
-                    customer.serviceStartTime = simulationTime;
-                    if (customer.queueJoinTime !== null) {
-                        const waitTime = simulationTime - customer.queueJoinTime;
-                        pooledStats.totalWaitTime += waitTime;
-                    }
-                    
                     // Update remaining queue positions (position 0 closest to servers)
                     pooledQueue.forEach((c, index) => {
                         c.queuePosition = index;
@@ -685,10 +637,16 @@
                     const customer = servers[i];
                     const serverX = i === 0 ? SERVER1_X : SERVER2_X;
                     
-                    // FIX: Set visual service start time when customer physically reaches server
-                    if (customer.state !== 'being_served' && Math.abs(customer.x - serverX) <= 2) {
+                    // Start service when customer reaches server
+                    if (customer.serviceStartTime === null && Math.abs(customer.x - serverX) <= 2) {
+                        customer.serviceStartTime = simulationTime;
                         customer.state = 'being_served';
-                        customer.visualServiceStartTime = simulationTime; // For progress bar
+                        
+                        // Calculate wait time (from queue join to service start)
+                        if (customer.queueJoinTime !== null) {
+                            const waitTime = simulationTime - customer.queueJoinTime;
+                            stats.totalWaitTime += waitTime;
+                        }
                     }
                     
                     // Complete service
@@ -812,9 +770,9 @@
                 ctx.font = '12px sans-serif';
                 ctx.fillText('SERVER ' + (i + 1), serverX, serverY - 40);
                 
-                // Draw progress bar if serving (only when customer has visually reached server)
-                if (servers[i] && servers[i].visualServiceStartTime) {
-                    const progress = Math.min(1, (simulationTime - servers[i].visualServiceStartTime) / servers[i].serviceTime);
+                // Draw progress bar if serving
+                if (servers[i] && servers[i].serviceStartTime) {
+                    const progress = Math.min(1, (simulationTime - servers[i].serviceStartTime) / servers[i].serviceTime);
                     const barWidth = 50;
                     const barHeight = 4;
                     const barX = serverX - barWidth / 2;
