@@ -5,93 +5,256 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supermarket Cashier Simulation</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        :root {
+            --bg-page: #eef2f8;
+            --bg-card: #ffffff;
+            --bg-soft: #f6f8fc;
+            --border: #e5e9f2;
+            --border-strong: #d8dee9;
+            --text: #1f2937;
+            --text-muted: #6b7280;
+            --text-subtle: #9ca3af;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --accent-soft: #eef2ff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warn: #f59e0b;
+            --purple: #8b5cf6;
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+            --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
+        }
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+            padding: 0;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 32px 24px;
+            background:
+                radial-gradient(1200px 600px at 10% -10%, #e0e7ff 0%, transparent 60%),
+                radial-gradient(900px 500px at 100% 0%, #dbeafe 0%, transparent 55%),
+                var(--bg-page);
+            min-height: 100vh;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
         }
         .container {
             max-width: 2000px;
             margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
         }
+        .header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .header-text { flex: 1; }
         h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
+            color: var(--text);
+            margin: 0 0 6px 0;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
         }
         .subtitle {
-            color: #7f8c8d;
-            margin-bottom: 30px;
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 15px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
         }
         .simulation-area {
-            background: #fafafa;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            background: linear-gradient(180deg, #fafbff 0%, #f4f6fc 100%);
+            border: 1px solid var(--border);
+            border-radius: 14px;
             position: relative;
             overflow: hidden;
+            box-shadow: var(--shadow-sm);
         }
         canvas {
             display: block;
+            max-width: 100%;
         }
         .controls {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
         .control-group {
-            background: #f8f9fa;
+            background: var(--bg-card);
             padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
         }
         .control-group h3 {
-            margin-top: 0;
-            color: #495057;
-            font-size: 16px;
+            margin: 0 0 16px 0;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-group h3::before {
+            content: "";
+            width: 4px;
+            height: 14px;
+            background: var(--accent);
+            border-radius: 2px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #6c757d;
-            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
         }
         input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
             width: 100%;
-            margin-bottom: 5px;
+            height: 6px;
+            background: var(--border);
+            border-radius: 999px;
+            outline: none;
+            margin: 6px 0 4px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border: 3px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(79, 70, 229, 0.35);
+            transition: transform 0.15s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border: 3px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(79, 70, 229, 0.35);
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text);
+            background: var(--bg-soft);
+            outline: none;
+            transition: border 0.15s, box-shadow 0.15s;
+        }
+        input[type="number"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+            background: #fff;
         }
         .value-display {
             text-align: right;
-            font-weight: 500;
-            color: #495057;
-            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 14px;
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
         }
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
         }
         .stat-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            text-align: center;
+            background: var(--bg-card);
+            padding: 18px 20px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            text-align: left;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s, box-shadow 0.15s;
         }
+        .stat-card:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--accent);
+            opacity: 0.7;
+        }
+        .stat-card:nth-child(2)::before { background: var(--warn); }
+        .stat-card:nth-child(3)::before { background: var(--danger); }
+        .stat-card:nth-child(4)::before { background: var(--purple); }
+        .stat-card:nth-child(5)::before { background: var(--success); }
         .stat-label {
-            color: #6c757d;
-            font-size: 14px;
-            margin-bottom: 5px;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
         }
         .stat-value {
-            font-size: 24px;
-            font-weight: 600;
-            color: #2c3e50;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.02em;
         }
         .charts {
             display: grid;
@@ -101,60 +264,90 @@
         .main-content {
             display: grid;
             grid-template-columns: 1fr 320px;
-            gap: 30px;
+            gap: 28px;
             align-items: start;
         }
         .left-panel {
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 24px;
+            min-width: 0;
         }
         .right-panel {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
         .chart-container {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
+            background: var(--bg-card);
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
             position: relative;
-            height: 300px;
+            height: 280px;
+            box-shadow: var(--shadow-sm);
         }
         button {
-            background: #3498db;
+            background: var(--accent);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 11px 22px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);
         }
         button:hover {
-            background: #2980b9;
+            background: var(--accent-hover);
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        button.secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid var(--border-strong);
+            box-shadow: var(--shadow-sm);
+        }
+        button.secondary:hover {
+            background: var(--bg-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: var(--shadow-md);
         }
         .button-group {
             display: flex;
             gap: 10px;
         }
+        @media (max-width: 1100px) {
+            .main-content { grid-template-columns: 1fr; }
+            .charts { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Supermarket Cashier Simulation</h1>
-        <p class="subtitle">Understanding Queue Dynamics in Service Operations</p>
-        
+        <div class="header">
+            <div class="header-text">
+                <h1>Supermarket Cashier Simulation</h1>
+                <p class="subtitle">Understanding queue dynamics in service operations</p>
+            </div>
+            <div class="badge">M/G/1 Queue</div>
+        </div>
+
         <div class="main-content">
             <div class="left-panel">
                 <div class="simulation-area">
                     <canvas id="simCanvas" width="1140" height="300"></canvas>
                 </div>
-                
+
                 <div class="button-group">
-                    <button onclick="toggleSimulation()" id="toggleBtn">▶️ Start Simulation</button>
-                    <button onclick="resetSimulation()">🔄 Reset</button>
+                    <button onclick="toggleSimulation()" id="toggleBtn">▶ Start Simulation</button>
+                    <button class="secondary" onclick="resetSimulation()">↻ Reset</button>
                 </div>
                 
                 <div class="stats">
@@ -226,8 +419,8 @@
                     <div class="control-group">
                         <h3>Random Seed</h3>
                         <label for="randomSeed">Seed (for reproducible results)</label>
-                        <input type="number" id="randomSeed" min="1" max="999999" value="12345" style="width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
-                        <div style="margin-top: 10px;">
+                        <input type="number" id="randomSeed" min="1" max="999999" value="12345">
+                        <div style="margin-top: 12px;">
                             <button onclick="applySeed()" style="width: 100%;">Apply Seed</button>
                         </div>
                     </div>
@@ -640,11 +833,11 @@
             const toggleBtn = document.getElementById('toggleBtn');
             
             if (running) {
-                toggleBtn.textContent = '⏸️ Stop Simulation';
+                toggleBtn.textContent = '❚❚ Stop Simulation';
                 lastFrameTime = performance.now();
                 requestAnimationFrame(animate);
             } else {
-                toggleBtn.textContent = '▶️ Start Simulation';
+                toggleBtn.textContent = '▶ Start Simulation';
             }
         }
         
@@ -678,7 +871,7 @@
             utilizationData = [];
             
             // Reset button state
-            document.getElementById('toggleBtn').textContent = '▶️ Start Simulation';
+            document.getElementById('toggleBtn').textContent = '▶ Start Simulation';
             
             updateStats();
             updateCharts();
