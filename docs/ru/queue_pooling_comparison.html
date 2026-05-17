@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сравнение объединения очередей</title>
+    <style>
+        :root {
+            --bg-page: #eef2f8;
+            --bg-card: #ffffff;
+            --bg-soft: #f6f8fc;
+            --border: #e5e9f2;
+            --border-strong: #d8dee9;
+            --text: #1f2937;
+            --text-muted: #6b7280;
+            --text-subtle: #9ca3af;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --accent-soft: #eef2ff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warn: #f59e0b;
+            --purple: #8b5cf6;
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+            --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-sans);
+            padding: 32px 24px;
+            background:
+                radial-gradient(1200px 600px at 10% -10%, #e0e7ff 0%, transparent 60%),
+                radial-gradient(900px 500px at 100% 0%, #dbeafe 0%, transparent 55%),
+                var(--bg-page);
+            min-height: 100vh;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+        }
+        .header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .header-text { flex: 1; }
+        h1 {
+            color: var(--text);
+            margin: 0 0 6px 0;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+        .subtitle {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 15px;
+        }
+        .simulation-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+        .simulation-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+        }
+        .simulation-title {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .simulation-area {
+            background: linear-gradient(180deg, #fafbff 0%, #f4f6fc 100%);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        canvas { display: block; max-width: 100%; }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 384px;
+            gap: 28px;
+            align-items: start;
+        }
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            min-width: 0;
+        }
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .control-group {
+            background: var(--bg-card);
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .control-group h3 {
+            margin: 0 0 14px 0;
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-group h3::before {
+            content: "";
+            width: 4px;
+            height: 14px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 999px;
+            outline: none;
+            margin: 6px 0 18px;
+        }
+        .control-group input[type="range"]:last-child {
+            margin-bottom: 0;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border: 3px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(79, 70, 229, 0.35);
+            transition: transform 0.15s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border: 3px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(79, 70, 229, 0.35);
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text);
+            background: var(--bg-soft);
+            outline: none;
+            transition: border 0.15s, box-shadow 0.15s;
+        }
+        input[type="number"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+            background: #fff;
+        }
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+        .control-row label {
+            margin-bottom: 0;
+        }
+        .value-display {
+            flex: none;
+            text-align: right;
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 13px;
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 18px;
+            box-shadow: var(--shadow-sm);
+        }
+        .sim-clock {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+        .sim-clock-label {
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .sim-clock-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
+            min-width: 5ch;
+            text-align: right;
+        }
+        details.about {
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px 16px;
+        }
+        details.about > summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        details.about > summary::-webkit-details-marker { display: none; }
+        details.about > summary::before {
+            content: "\25B8";
+            color: var(--text-subtle);
+            font-size: 11px;
+            transition: transform 0.15s;
+        }
+        details.about[open] > summary::before {
+            transform: rotate(90deg);
+        }
+        details.about .about-body {
+            padding: 2px 0 12px;
+        }
+        details.about .about-body p {
+            margin: 6px 0;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+        details.about .about-body strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+        .seed-row {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+        .seed-row input[type="number"] {
+            flex: 1;
+        }
+        .icon-btn {
+            flex: none;
+            width: 40px;
+            padding: 0;
+            font-size: 18px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stats-comparison {
+            display: grid;
+            gap: 16px;
+        }
+        .stats-table {
+            background: var(--bg-card);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            overflow-x: auto;
+        }
+        .stats-table table {
+            width: 100%;
+            min-width: 520px;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .stats-table th {
+            background: var(--bg-soft);
+            padding: 14px 16px;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 12px;
+            white-space: nowrap;
+            border-bottom: 1px solid var(--border);
+        }
+        .stats-table th.col-metric { text-align: left; width: 34%; }
+        .stats-table th.col-num { text-align: right; }
+        .stats-table td {
+            padding: 14px 16px;
+            border-top: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .stats-table tr:first-child td { border-top: none; }
+        .metric-name {
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .metric-value {
+            font-weight: 600;
+            text-align: right;
+            font-size: 14px;
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+            color: var(--text-muted);
+        }
+        .metric-value.winner {
+            color: var(--accent-hover);
+            font-weight: 700;
+            background: var(--accent-soft);
+            box-shadow: inset 2px 0 0 var(--accent);
+        }
+        .improvement {
+            text-align: right;
+            font-weight: 700;
+            font-size: 13px;
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+        }
+        .improvement.positive { color: var(--success); }
+        .improvement.negative { color: var(--danger); }
+        .improvement.neutral { color: var(--text-subtle); }
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 11px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);
+        }
+        button:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        button.secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid var(--border-strong);
+            box-shadow: var(--shadow-sm);
+        }
+        button.secondary:hover {
+            background: var(--bg-soft);
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: var(--shadow-md);
+        }
+        button:disabled {
+            background: var(--text-subtle);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        @media (max-width: 1100px) {
+            .main-content { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 560px) {
+            .container { padding: 24px 18px; }
+            .action-bar { gap: 12px; }
+            .button-group { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-text">
+                <h1>Сравнение объединения очередей</h1>
+                <p class="subtitle">Параллельное сравнение раздельных и объединённых серверов</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="action-bar">
+                    <div class="button-group">
+                        <button id="toggleBtn">&#9654; Запустить симуляцию</button>
+                        <button class="secondary" id="resetBtn">&#8635; Сбросить</button>
+                    </div>
+                    <div class="sim-clock">
+                        <span class="sim-clock-label">Время симуляции</span>
+                        <span class="sim-clock-value" id="simulationTime">0.0 с</span>
+                    </div>
+                </div>
+
+                <details class="about">
+                    <summary>Об этой симуляции</summary>
+                    <div class="about-body">
+                        <p>Эта симуляция показывает преимущества объединения очередей: две системы получают <strong>один и тот же</strong> поток приходов и времён обслуживания.</p>
+                        <p><strong>Раздельные серверы:</strong> у каждого сервера своя отдельная очередь. Покупатели встают в более короткую из них.</p>
+                        <p><strong>Объединённые серверы:</strong> все серверы используют одну общую очередь. Следующий покупатель идёт к любому освободившемуся серверу.</p>
+                    </div>
+                </details>
+
+                <div class="simulation-wrapper">
+                    <div class="simulation-section">
+                        <div class="simulation-title">
+                            Система с раздельными очередями
+                        </div>
+                        <div class="simulation-area">
+                            <canvas id="separateCanvas" width="960" height="250"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="simulation-section">
+                        <div class="simulation-title">
+                            Система с общей очередью
+                        </div>
+                        <div class="simulation-area">
+                            <canvas id="pooledCanvas" width="960" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-comparison">
+                    <div class="stats-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="col-metric">Показатель</th>
+                                    <th class="col-num">Раздельные серверы</th>
+                                    <th class="col-num">Объединённые серверы</th>
+                                    <th class="col-num">Улучшение</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="metric-name">Средняя длина очереди</td>
+                                    <td class="metric-value" id="separateQueueLength">0.0</td>
+                                    <td class="metric-value" id="pooledQueueLength">0.0</td>
+                                    <td class="improvement neutral" id="queueImprovement">&ndash;</td>
+                                </tr>
+                                <tr>
+                                    <td class="metric-name">Среднее время ожидания</td>
+                                    <td class="metric-value" id="separateWaitTime">0.0 с</td>
+                                    <td class="metric-value" id="pooledWaitTime">0.0 с</td>
+                                    <td class="improvement neutral" id="waitImprovement">&ndash;</td>
+                                </tr>
+                                <tr>
+                                    <td class="metric-name">Всего обслужено покупателей</td>
+                                    <td class="metric-value" id="separateServed">0</td>
+                                    <td class="metric-value" id="pooledServed">0</td>
+                                    <td class="improvement neutral" id="servedImprovement" title="Обе системы получают одинаковый поток приходов, поэтому суммарная пропускная способность равна по построению.">н/д</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="controls">
+                    <div class="control-group">
+                        <h3>Приход покупателей</h3>
+                        <div class="control-row">
+                            <label for="arrivalMean">Среднее время между приходами (секунды)</label>
+                            <span class="value-display" id="arrivalMeanValue">1.5 с</span>
+                        </div>
+                        <input type="range" id="arrivalMean" min="1" max="10" step="0.1" value="1.5">
+
+                        <div class="control-row">
+                            <label for="arrivalCV">Разброс приходов (CV)</label>
+                            <span class="value-display" id="arrivalCVValue">1.0</span>
+                        </div>
+                        <input type="range" id="arrivalCV" min="0.1" max="2" step="0.1" value="1">
+                    </div>
+
+                    <div class="control-group">
+                        <h3>Время обслуживания</h3>
+                        <div class="control-row">
+                            <label for="serviceMean">Среднее время обслуживания (секунды)</label>
+                            <span class="value-display" id="serviceMeanValue">1.0 с</span>
+                        </div>
+                        <input type="range" id="serviceMean" min="1" max="10" step="0.1" value="1">
+
+                        <div class="control-row">
+                            <label for="serviceCV">Разброс обслуживания (CV)</label>
+                            <span class="value-display" id="serviceCVValue">1.0</span>
+                        </div>
+                        <input type="range" id="serviceCV" min="0.1" max="2" step="0.1" value="1">
+                    </div>
+
+                    <div class="control-group">
+                        <h3>Случайное зерно</h3>
+                        <label for="randomSeed">Зерно (для воспроизводимых результатов)</label>
+                        <div class="seed-row">
+                            <input type="number" id="randomSeed" min="1" max="999999" value="12345">
+                            <button id="applySeedBtn" class="icon-btn" title="Применить зерно и сбросить" aria-label="Применить зерно и сбросить">&#10227;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (() => {
+        'use strict';
+
+        // ---- Configuration -------------------------------------------------
+        const CONFIG = Object.freeze({
+            SIM_DT: 1 / 60,
+            MAX_FRAME_DT: 0.05,
+            WALK_SPEED: 540,
+            UI_THROTTLE: 0.15,
+            ARRIVAL_LOOKAHEAD: 6,
+            layout: Object.freeze({
+                W: 960, H: 250,
+                ENTRANCE_X: 40,
+                SERVER1_X: 600,
+                SERVER2_X: 720,
+                AVG_SERVER_X: 660,
+                EXIT_X: 920,
+                FLOOR_Y: 200,
+                SPACING: 50,
+                QUEUE_Y_OFFSET: 70,
+                QUEUE_HEAD_OFFSET: 180,
+                MAX_VISIBLE_QUEUE: 6
+            })
+        });
+        const L = CONFIG.layout;
+
+        // ---- Seeded RNG (32-bit LCG) ---------------------------------------
+        const Rng = (() => {
+            let s = 12345;
+            return {
+                setSeed(n) {
+                    let v = Math.floor(Number(n));
+                    if (!Number.isFinite(v)) v = 12345;
+                    v = Math.min(999999, Math.max(1, v));
+                    s = v >>> 0;
+                    return v;
+                },
+                next() {
+                    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+                    return s / 4294967296;
+                }
+            };
+        })();
+
+        // ---- Distributions -------------------------------------------------
+        const Dist = {
+            gaussian() {
+                let u = 0, v = 0;
+                while (u === 0) u = Rng.next();
+                while (v === 0) v = Rng.next();
+                return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+            },
+            gamma(shape, scale) {
+                if (shape < 1) {
+                    return Dist.gamma(shape + 1, scale) * Math.pow(Rng.next(), 1 / shape);
+                }
+                const d = shape - 1 / 3;
+                const c = 1 / Math.sqrt(9 * d);
+                for (;;) {
+                    let x, v;
+                    do { x = Dist.gaussian(); v = 1 + c * x; } while (v <= 0);
+                    v = v * v * v;
+                    const u = Rng.next();
+                    if (u < 1 - 0.0331 * x * x * x * x) return d * v * scale;
+                    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v * scale;
+                }
+            },
+            gammaParams(mean, cv) {
+                const shape = 1 / (cv * cv);
+                return { shape, scale: mean / shape };
+            }
+        };
+
+        // ---- Live parameters ----------------------------------------------
+        const params = { arrivalMean: 1.5, arrivalCV: 1, serviceMean: 1, serviceCV: 1 };
+
+        // ---- Lazy, unbounded shared event stream ---------------------------
+        // Both systems consume THIS SAME array -> common random numbers.
+        let events = [];
+        let lastArrivalTime = 0;
+
+        function resetEvents() {
+            events = [];
+            lastArrivalTime = 0;
+        }
+
+        function ensureEventsUntil(t) {
+            while (lastArrivalTime < t + CONFIG.ARRIVAL_LOOKAHEAD) {
+                const ap = Dist.gammaParams(params.arrivalMean, params.arrivalCV);
+                lastArrivalTime += Dist.gamma(ap.shape, ap.scale);
+                const sp = Dist.gammaParams(params.serviceMean, params.serviceCV);
+                const serviceTime = Dist.gamma(sp.shape, sp.scale);
+                events.push({ id: events.length, arrivalTime: lastArrivalTime, serviceTime });
+            }
+        }
+
+        // ---- Stats factory -------------------------------------------------
+        function makeStats() {
+            return {
+                totalWaitTime: 0,
+                totalQueueArea: 0,
+                customersServed: 0,
+                waitCount: 0,
+                elapsed: 0
+            };
+        }
+
+        // ---- Customer (model + render state) -------------------------------
+        const TRANSITIONS = {
+            queued:     ['in_service'],
+            in_service: ['leaving'],
+            leaving:    []
+        };
+
+        class Customer {
+            constructor(ev) {
+                this.id = ev.id;
+                this.arrivalTime = ev.arrivalTime;
+                this.serviceDuration = ev.serviceTime;
+                this.serviceStartTime = null;
+                this.serviceEndTime = null;
+                this.departureTime = null;
+                this.state = 'queued';
+                this.queueIdx = 0;     // separate: 0/1; pooled: 0
+                this.queuePos = -1;
+                this.serverIdx = -1;
+                // render-only
+                this.x = L.ENTRANCE_X;
+                this.y = L.FLOOR_Y;
+                this.exitY = L.FLOOR_Y;
+                this.phase = 0;
+            }
+            setState(to) {
+                if (!TRANSITIONS[this.state].includes(to)) {
+                    throw new Error(`Invalid transition ${this.state} -> ${to}`);
+                }
+                this.state = to;
+            }
+        }
+
+        function serverX(i) { return i === 0 ? L.SERVER1_X : L.SERVER2_X; }
+
+        function target(sys, c) {
+            if (c.state === 'leaving') {
+                return { x: L.EXIT_X + 30, y: c.exitY };
+            }
+            if (c.state === 'in_service') {
+                const y = (sys.type === 'separate' && c.serverIdx === 0)
+                    ? L.FLOOR_Y - L.QUEUE_Y_OFFSET : L.FLOOR_Y;
+                return { x: serverX(c.serverIdx), y };
+            }
+            // queued
+            if (sys.type === 'separate') {
+                const x = serverX(c.queueIdx) - L.QUEUE_HEAD_OFFSET - c.queuePos * L.SPACING;
+                const y = c.queueIdx === 0 ? L.FLOOR_Y - L.QUEUE_Y_OFFSET : L.FLOOR_Y;
+                return { x, y };
+            }
+            return {
+                x: L.AVG_SERVER_X - L.QUEUE_HEAD_OFFSET - c.queuePos * L.SPACING,
+                y: L.FLOOR_Y
+            };
+        }
+
+        // ---- System (separate | pooled) ------------------------------------
+        function makeSystem(type) {
+            return {
+                type,
+                queues: type === 'separate' ? [[], []] : [[]],
+                servers: [null, null],
+                customers: [],
+                nextEventIdx: 0,
+                stats: makeStats()
+            };
+        }
+
+        let separate = makeSystem('separate');
+        let pooled = makeSystem('pooled');
+
+        function chooseQueue(sys) {
+            const t0 = sys.queues[0].length + (sys.servers[0] ? 1 : 0);
+            const t1 = sys.queues[1].length + (sys.servers[1] ? 1 : 0);
+            return t0 <= t1 ? 0 : 1;
+        }
+
+        function waitingCount(sys) {
+            return sys.type === 'separate'
+                ? sys.queues[0].length + sys.queues[1].length
+                : sys.queues[0].length;
+        }
+
+        function stepSystem(sys, dt, simTimeBefore) {
+            const simTime = simTimeBefore + dt;
+
+            // 1. Admit arrivals due by simTime (model decision, not visual)
+            while (sys.nextEventIdx < events.length &&
+                   events[sys.nextEventIdx].arrivalTime <= simTime) {
+                const c = new Customer(events[sys.nextEventIdx++]);
+                const q = sys.type === 'separate' ? chooseQueue(sys) : 0;
+                c.queueIdx = q;
+                c.queuePos = sys.queues[q].length;
+                sys.queues[q].push(c);
+                sys.customers.push(c);
+            }
+
+            // 2. Complete finished services
+            for (let i = 0; i < 2; i++) {
+                const c = sys.servers[i];
+                if (c && simTime >= c.serviceEndTime) {
+                    c.departureTime = c.serviceEndTime;
+                    c.setState('leaving');
+                    sys.stats.customersServed++;
+                    sys.servers[i] = null;
+                }
+            }
+
+            // 3. Dispatch waiting customers to free servers
+            for (let i = 0; i < 2; i++) {
+                if (sys.servers[i] !== null) continue;
+                const q = sys.type === 'separate' ? sys.queues[i] : sys.queues[0];
+                if (q.length === 0) continue;
+                const c = q.shift();
+                sys.servers[i] = c;
+                c.serverIdx = i;
+                c.serviceStartTime = simTime;
+                c.serviceEndTime = simTime + c.serviceDuration;
+                c.exitY = (sys.type === 'separate' && i === 0)
+                    ? L.FLOOR_Y - L.QUEUE_Y_OFFSET : L.FLOOR_Y;
+                c.setState('in_service');
+                sys.stats.totalWaitTime += c.serviceStartTime - c.arrivalTime;
+                sys.stats.waitCount++;
+                q.forEach((qc, idx) => { qc.queuePos = idx; });
+            }
+
+            // 4. Time-weighted queue length (waiting only)
+            sys.stats.totalQueueArea += waitingCount(sys) * dt;
+            sys.stats.elapsed += dt;
+        }
+
+        // ---- Renderer ------------------------------------------------------
+        function makeRenderer(canvasId, sysType) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+
+            function setup() {
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = L.W * dpr;
+                canvas.height = L.H * dpr;
+                canvas.style.width = L.W + 'px';
+                canvas.style.height = L.H + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+
+            function animate(sys, dt) {
+                const step = CONFIG.WALK_SPEED * dt;
+                for (const c of sys.customers) {
+                    c.phase += dt * 2;
+                    const tg = target(sys, c);
+                    const dx = tg.x - c.x, dy = tg.y - c.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist > step) {
+                        c.x += (dx / dist) * step;
+                        c.y += (dy / dist) * step;
+                    } else {
+                        c.x = tg.x;
+                        c.y = tg.y;
+                    }
+                }
+                sys.customers = sys.customers.filter(
+                    c => !(c.state === 'leaving' && c.x >= L.EXIT_X)
+                );
+            }
+
+            function drawFigure(sys, c) {
+                ctx.save();
+                ctx.translate(c.x, c.y);
+                const tg = target(sys, c);
+                const moving = Math.hypot(tg.x - c.x, tg.y - c.y) > 1;
+                const bob = moving ? Math.sin(c.phase) * 2 : 0;
+                ctx.strokeStyle = '#34495e';
+                ctx.lineWidth = 2;
+                ctx.fillStyle = '#34495e';
+                ctx.beginPath();
+                ctx.arc(0, -35 + bob, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(0, -27 + bob);
+                ctx.lineTo(0, -5 + bob);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(-8, -20 + bob);
+                ctx.lineTo(0, -20 + bob);
+                ctx.lineTo(8, -20 + bob);
+                ctx.stroke();
+                const leg = moving ? Math.sin(c.phase * 2) * 5 : 0;
+                ctx.beginPath();
+                ctx.moveTo(0, -5 + bob);
+                ctx.lineTo(-5 + leg, 0);
+                ctx.moveTo(0, -5 + bob);
+                ctx.lineTo(5 - leg, 0);
+                ctx.stroke();
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = '10px ' + getComputedStyle(document.body).fontFamily;
+                ctx.textAlign = 'center';
+                ctx.fillText(String(c.id), 0, -50 + bob);
+                ctx.restore();
+            }
+
+            function rrect(x, y, w, h, r) {
+                const rr = Math.min(r, w / 2, h / 2);
+                ctx.beginPath();
+                ctx.moveTo(x + rr, y);
+                ctx.arcTo(x + w, y, x + w, y + h, rr);
+                ctx.arcTo(x + w, y + h, x, y + h, rr);
+                ctx.arcTo(x, y + h, x, y, rr);
+                ctx.arcTo(x, y, x + w, y, rr);
+                ctx.closePath();
+            }
+
+            function drawGateway(cx, fill, label) {
+                rrect(cx - 20, L.FLOOR_Y - 58, 40, 58, 8);
+                ctx.fillStyle = fill;
+                ctx.fill();
+                ctx.save();
+                ctx.translate(cx, L.FLOOR_Y - 29);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '700 11px ' + FONT;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(label, 0, 0);
+                ctx.restore();
+                ctx.textBaseline = 'alphabetic';
+            }
+
+            function drawServerBox(sx, sy, idx) {
+                rrect(sx - 30, sy - 80, 60, 80, 10);
+                ctx.fillStyle = '#64748b';
+                ctx.fill();
+                // person glyph
+                ctx.fillStyle = '#e2e8f0';
+                ctx.beginPath();
+                ctx.arc(sx, sy - 52, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(sx, sy - 24, 15, Math.PI, 0);
+                ctx.fill();
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '600 11px ' + FONT;
+                ctx.textAlign = 'center';
+                ctx.fillText('Сервер ' + (idx + 1), sx, sy - 6);
+            }
+
+            const FONT = getComputedStyle(document.body).fontFamily;
+
+            function draw(sys, simTime) {
+                const isPooled = sysType === 'pooled';
+                ctx.clearRect(0, 0, L.W, L.H);
+
+                ctx.strokeStyle = '#e5e9f2';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, L.FLOOR_Y);
+                ctx.lineTo(L.W, L.FLOOR_Y);
+                ctx.stroke();
+
+                drawGateway(L.ENTRANCE_X, '#10b981', 'ВХОД');
+
+                // Queue swimlane track(s): solid light-gray container, not dashed.
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.10)';
+                ctx.strokeStyle = '#e5e9f2';
+                ctx.lineWidth = 1;
+                ctx.font = '600 13px ' + FONT;
+                ctx.textAlign = 'center';
+                if (isPooled) {
+                    const right = L.AVG_SERVER_X - L.QUEUE_HEAD_OFFSET;
+                    const w = 350, left = right - w;
+                    rrect(left, L.FLOOR_Y - 80, w, 80, 10);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillText('Общая очередь', left + w / 2, L.FLOOR_Y - 90);
+                } else {
+                    const w = 300;
+                    const q1Left = (L.SERVER1_X - L.QUEUE_HEAD_OFFSET) - w;
+                    const q2Left = (L.SERVER2_X - L.QUEUE_HEAD_OFFSET) - w;
+                    rrect(q1Left, L.FLOOR_Y - 150, w, 60, 10);
+                    ctx.fill();
+                    ctx.stroke();
+                    rrect(q2Left, L.FLOOR_Y - 60, w, 60, 10);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillText('Очередь 1', q1Left + w / 2, L.FLOOR_Y - 160);
+                    ctx.fillText('Очередь 2', q2Left + w / 2, L.FLOOR_Y - 70);
+                }
+
+                for (let i = 0; i < 2; i++) {
+                    const sx = serverX(i);
+                    const sy = isPooled ? L.FLOOR_Y
+                        : (i === 0 ? L.FLOOR_Y - L.QUEUE_Y_OFFSET : L.FLOOR_Y);
+                    drawServerBox(sx, sy, i);
+
+                    const srv = sys.servers[i];
+                    if (srv && srv.serviceStartTime !== null) {
+                        const span = srv.serviceEndTime - srv.serviceStartTime;
+                        const progress = span > 0
+                            ? Math.min(1, Math.max(0, (simTime - srv.serviceStartTime) / span))
+                            : 1;
+                        const bw = 50, bh = 5;
+                        const bx = sx - bw / 2, by = sy - 95;
+                        ctx.fillStyle = '#e5e9f2';
+                        rrect(bx, by, bw, bh, 2.5); ctx.fill();
+                        ctx.fillStyle = '#10b981';
+                        rrect(bx, by, Math.max(bh, bw * progress), bh, 2.5); ctx.fill();
+                    }
+                }
+
+                drawGateway(L.EXIT_X, '#f59e0b', 'ВЫХОД');
+
+                const hidden = [0, 0];
+                for (const c of sys.customers) {
+                    if (c.state === 'queued' && c.queuePos >= L.MAX_VISIBLE_QUEUE) {
+                        hidden[c.queueIdx]++;
+                        continue;
+                    }
+                    drawFigure(sys, c);
+                }
+                ctx.fillStyle = '#818cf8';
+                ctx.font = '700 13px ' + FONT;
+                ctx.textAlign = 'left';
+                if (isPooled) {
+                    if (hidden[0] > 0) {
+                        const left = (L.AVG_SERVER_X - L.QUEUE_HEAD_OFFSET) - 350;
+                        ctx.fillText('+' + hidden[0] + ' ещё', left + 6, L.FLOOR_Y - 30);
+                    }
+                } else {
+                    if (hidden[0] > 0) {
+                        const left = (L.SERVER1_X - L.QUEUE_HEAD_OFFSET) - 300;
+                        ctx.fillText('+' + hidden[0] + ' ещё', left + 6, L.FLOOR_Y - 100);
+                    }
+                    if (hidden[1] > 0) {
+                        const left = (L.SERVER2_X - L.QUEUE_HEAD_OFFSET) - 300;
+                        ctx.fillText('+' + hidden[1] + ' ещё', left + 6, L.FLOOR_Y - 10);
+                    }
+                }
+            }
+
+            return { setup, animate, draw };
+        }
+
+        const sepRenderer = makeRenderer('separateCanvas', 'separate');
+        const poolRenderer = makeRenderer('pooledCanvas', 'pooled');
+
+        // ---- Stats DOM -----------------------------------------------------
+        const el = id => document.getElementById(id);
+
+        function avgQueue(sys) {
+            return sys.stats.elapsed > 0 ? sys.stats.totalQueueArea / sys.stats.elapsed : 0;
+        }
+        function avgWait(sys) {
+            return sys.stats.waitCount > 0 ? sys.stats.totalWaitTime / sys.stats.waitCount : 0;
+        }
+
+        function setImprovement(id, sepVal, poolVal, enough) {
+            const e = el(id);
+            if (!enough || sepVal <= 0) {
+                e.textContent = '–';
+                e.className = 'improvement neutral';
+                return;
+            }
+            const pct = ((sepVal - poolVal) / sepVal) * 100;
+            e.textContent = pct.toFixed(0) + '%';
+            e.className = 'improvement ' +
+                (pct > 0 ? 'positive' : pct < 0 ? 'negative' : 'neutral');
+        }
+
+        // Lower value wins; highlight the better cell, clear when tied/insufficient.
+        function markWinner(sepId, poolId, sepVal, poolVal, enough) {
+            const s = el(sepId), p = el(poolId);
+            s.classList.remove('winner');
+            p.classList.remove('winner');
+            if (!enough || Math.abs(sepVal - poolVal) < 1e-9) return;
+            (sepVal < poolVal ? s : p).classList.add('winner');
+        }
+
+        function updateStats(simTime) {
+            el('simulationTime').textContent = simTime.toFixed(1) + ' с';
+
+            const sQ = avgQueue(separate), pQ = avgQueue(pooled);
+            const sW = avgWait(separate), pW = avgWait(pooled);
+
+            el('separateQueueLength').textContent = sQ.toFixed(1);
+            el('pooledQueueLength').textContent = pQ.toFixed(1);
+            el('separateWaitTime').textContent = sW.toFixed(1) + ' с';
+            el('pooledWaitTime').textContent = pW.toFixed(1) + ' с';
+            el('separateServed').textContent = separate.stats.customersServed;
+            el('pooledServed').textContent = pooled.stats.customersServed;
+
+            const enough = separate.stats.customersServed > 5 &&
+                           pooled.stats.customersServed > 5;
+            setImprovement('queueImprovement', sQ, pQ, enough);
+            setImprovement('waitImprovement', sW, pW, enough);
+            markWinner('separateQueueLength', 'pooledQueueLength', sQ, pQ, enough);
+            markWinner('separateWaitTime', 'pooledWaitTime', sW, pW, enough);
+        }
+
+        // ---- Clock / App ---------------------------------------------------
+        let running = false;
+        let simTime = 0;
+        let acc = 0;
+        let uiAcc = 0;
+        let lastFrame = 0;
+        let rafId = null;
+        let pausedByHidden = false;
+
+        function stepSimulation(dt) {
+            ensureEventsUntil(simTime + dt);
+            stepSystem(separate, dt, simTime);
+            stepSystem(pooled, dt, simTime);
+            simTime += dt;
+        }
+
+        function drawAll() {
+            sepRenderer.draw(separate, simTime);
+            poolRenderer.draw(pooled, simTime);
+        }
+
+        function frame(now) {
+            if (!running) return;
+            const frameDt = Math.min((now - lastFrame) / 1000, CONFIG.MAX_FRAME_DT);
+            lastFrame = now;
+            acc += frameDt;
+            while (acc >= CONFIG.SIM_DT) {
+                stepSimulation(CONFIG.SIM_DT);
+                acc -= CONFIG.SIM_DT;
+            }
+            sepRenderer.animate(separate, frameDt);
+            poolRenderer.animate(pooled, frameDt);
+            uiAcc += frameDt;
+            if (uiAcc >= CONFIG.UI_THROTTLE) {
+                updateStats(simTime);
+                uiAcc = 0;
+            }
+            drawAll();
+            rafId = requestAnimationFrame(frame);
+        }
+
+        function setButton() {
+            el('toggleBtn').innerHTML = running
+                ? '&#10074;&#10074; Приостановить'
+                : (simTime > 0 ? '&#9654; Продолжить' : '&#9654; Запустить симуляцию');
+        }
+
+        function start() {
+            if (running) return;
+            running = true;
+            lastFrame = performance.now();
+            acc = 0;
+            setButton();
+            rafId = requestAnimationFrame(frame);
+        }
+
+        function pause() {
+            running = false;
+            if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+            setButton();
+        }
+
+        function toggle() {
+            if (running) pause(); else start();
+        }
+
+        function reset() {
+            pause();
+            simTime = 0;
+            acc = 0;
+            uiAcc = 0;
+            Rng.setSeed(el('randomSeed').value);
+            resetEvents();
+            separate = makeSystem('separate');
+            pooled = makeSystem('pooled');
+            updateStats(0);
+            drawAll();
+            setButton();
+        }
+
+        function applySeed() {
+            const v = Rng.setSeed(el('randomSeed').value);
+            el('randomSeed').value = v;
+            reset();
+        }
+
+        // ---- UI wiring -----------------------------------------------------
+        function bindSlider(id, key, fmt) {
+            const input = el(id);
+            const out = el(id + 'Value');
+            const sync = () => {
+                params[key] = parseFloat(input.value);
+                out.textContent = fmt(input.value);
+            };
+            input.addEventListener('input', sync);
+            sync();
+        }
+
+        bindSlider('arrivalMean', 'arrivalMean', v => parseFloat(v).toFixed(1) + ' с');
+        bindSlider('arrivalCV', 'arrivalCV', v => parseFloat(v).toFixed(1));
+        bindSlider('serviceMean', 'serviceMean', v => parseFloat(v).toFixed(1) + ' с');
+        bindSlider('serviceCV', 'serviceCV', v => parseFloat(v).toFixed(1));
+
+        el('toggleBtn').addEventListener('click', toggle);
+        el('resetBtn').addEventListener('click', reset);
+        el('applySeedBtn').addEventListener('click', applySeed);
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (running) { pausedByHidden = true; pause(); }
+            } else if (pausedByHidden) {
+                pausedByHidden = false;
+                start();
+            }
+        });
+
+        // ---- Init ----------------------------------------------------------
+        sepRenderer.setup();
+        poolRenderer.setup();
+        Rng.setSeed(el('randomSeed').value);
+        updateStats(0);
+        drawAll();
+        setButton();
+    })();
+    </script>
+</body>
+</html>
