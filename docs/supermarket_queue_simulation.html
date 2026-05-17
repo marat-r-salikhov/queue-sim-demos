@@ -72,11 +72,6 @@
             font-weight: 700;
             letter-spacing: -0.025em;
         }
-        .subtitle {
-            color: #4b5563;
-            margin: 0;
-            font-size: 15px;
-        }
         .simulation-area {
             background: linear-gradient(180deg, #fafbff 0%, #f4f6fc 100%);
             border: 1px solid var(--border);
@@ -416,7 +411,6 @@
         <div class="header">
             <div class="header-text">
                 <h1>Supermarket Cashier Simulation</h1>
-                <p class="subtitle">Understanding queue dynamics in service operations</p>
             </div>
         </div>
 
@@ -1037,13 +1031,13 @@
         }
 
         const queueChart = makeChart('queueChart', 'Queue Length', 'rgb(52, 152, 219)',
-            'Number of Customers', 'Queue Length Over Time');
+            'Number of Customers', 'Queue Length');
         const waitChart = makeChart('waitChart', 'Average Wait Time', 'rgb(231, 76, 60)',
-            'Wait Time (seconds)', 'Average Wait Time Over Time');
+            'Wait Time (seconds)', 'Average Wait Time');
         const arrivalRateChart = makeChart('arrivalRateChart', 'Arrival Rate', 'rgb(243, 156, 18)',
-            'Arrivals per Second', 'Customer Arrival Rate Over Time');
+            'Arrivals per Second', 'Customer Arrival Rate');
         const utilizationChart = makeChart('utilizationChart', 'Server Utilization', 'rgb(155, 89, 182)',
-            'Utilization (%)', 'Server Utilization Over Time', 100);
+            'Utilization (%)', 'Server Utilization', 100);
 
         const series = { q: [], w: [], a: [], u: [], labels: [] };
 

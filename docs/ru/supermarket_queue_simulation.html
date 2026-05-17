@@ -72,11 +72,6 @@
             font-weight: 700;
             letter-spacing: -0.025em;
         }
-        .subtitle {
-            color: #4b5563;
-            margin: 0;
-            font-size: 15px;
-        }
         .simulation-area {
             background: linear-gradient(180deg, #fafbff 0%, #f4f6fc 100%);
             border: 1px solid var(--border);
@@ -416,7 +411,6 @@
         <div class="header">
             <div class="header-text">
                 <h1>Симуляция очереди в супермаркете</h1>
-                <p class="subtitle">Как устроены очереди в сфере обслуживания</p>
             </div>
         </div>
 
@@ -1037,13 +1031,13 @@
         }
 
         const queueChart = makeChart('queueChart', 'Длина очереди', 'rgb(52, 152, 219)',
-            'Число покупателей', 'Длина очереди по ходу симуляции');
+            'Число покупателей', 'Длина очереди');
         const waitChart = makeChart('waitChart', 'Среднее время ожидания', 'rgb(231, 76, 60)',
-            'Время ожидания (секунды)', 'Среднее время ожидания по ходу симуляции');
+            'Время ожидания (секунды)', 'Среднее время ожидания');
         const arrivalRateChart = makeChart('arrivalRateChart', 'Интенсивность прибытий', 'rgb(243, 156, 18)',
-            'Прибытий в секунду', 'Интенсивность прибытий покупателей по ходу симуляции');
+            'Прибытий в секунду', 'Интенсивность прибытий покупателей');
         const utilizationChart = makeChart('utilizationChart', 'Загрузка кассы', 'rgb(155, 89, 182)',
-            'Загрузка (%)', 'Загрузка кассы по ходу симуляции', 100);
+            'Загрузка (%)', 'Загрузка кассы', 100);
 
         const series = { q: [], w: [], a: [], u: [], labels: [] };
 
