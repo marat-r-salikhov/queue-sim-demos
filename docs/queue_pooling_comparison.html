@@ -72,27 +72,6 @@
             margin: 0;
             font-size: 15px;
         }
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: var(--accent-soft);
-            color: var(--accent);
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-        .badge::before {
-            content: "";
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
-        }
         .simulation-wrapper {
             display: flex;
             flex-direction: column;
@@ -114,15 +93,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-        .simulation-title .tag {
-            font-size: 11px;
-            padding: 3px 9px;
-            border-radius: 999px;
-            font-weight: 600;
-            background: var(--accent-soft);
-            color: var(--accent-hover);
-            border: 1px solid #c7d2fe;
         }
         .simulation-area {
             background: linear-gradient(180deg, #fafbff 0%, #f4f6fc 100%);
@@ -469,7 +439,6 @@
                 <h1>Queue Pooling Comparison</h1>
                 <p class="subtitle">Side-by-side comparison of separate vs. pooled server architectures</p>
             </div>
-            <div class="badge">A/B Simulation</div>
         </div>
 
         <div class="main-content">
@@ -498,7 +467,6 @@
                     <div class="simulation-section">
                         <div class="simulation-title">
                             Separate Servers System
-                            <span class="tag">Independent queues</span>
                         </div>
                         <div class="simulation-area">
                             <canvas id="separateCanvas" width="960" height="250"></canvas>
@@ -508,7 +476,6 @@
                     <div class="simulation-section">
                         <div class="simulation-title">
                             Pooled Servers System
-                            <span class="tag">Shared queue</span>
                         </div>
                         <div class="simulation-area">
                             <canvas id="pooledCanvas" width="960" height="250"></canvas>
