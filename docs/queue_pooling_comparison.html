@@ -110,27 +110,19 @@
             font-weight: 600;
             color: var(--text);
             margin-bottom: 12px;
-            font-size: 13px;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
+            font-size: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
         .simulation-title .tag {
             font-size: 11px;
-            padding: 3px 8px;
+            padding: 3px 9px;
             border-radius: 999px;
             font-weight: 600;
-            letter-spacing: 0.04em;
-        }
-        .simulation-title .tag.separate {
-            background: #fef3c7;
-            color: #b45309;
-        }
-        .simulation-title .tag.pooled {
-            background: #dcfce7;
-            color: #047857;
+            background: var(--accent-soft);
+            color: var(--accent-hover);
+            border: 1px solid #c7d2fe;
         }
         .simulation-area {
             background: linear-gradient(180deg, #fafbff 0%, #f4f6fc 100%);
@@ -171,10 +163,8 @@
         .control-group h3 {
             margin: 0 0 14px 0;
             color: var(--text);
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
+            font-size: 15px;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -201,7 +191,10 @@
             background: var(--border);
             border-radius: 999px;
             outline: none;
-            margin: 6px 0 4px;
+            margin: 6px 0 18px;
+        }
+        .control-group input[type="range"]:last-child {
+            margin-bottom: 0;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -244,36 +237,115 @@
             box-shadow: 0 0 0 3px var(--accent-soft);
             background: #fff;
         }
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+        .control-row label {
+            margin-bottom: 0;
+        }
         .value-display {
+            flex: none;
             text-align: right;
             font-weight: 600;
             color: var(--accent);
-            margin-bottom: 12px;
             font-size: 13px;
             font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
         }
-        .sim-time {
-            text-align: center;
-            padding: 16px;
-            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+        .action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 14px;
-            border: 1px solid #c7d2fe;
+            padding: 14px 18px;
             box-shadow: var(--shadow-sm);
         }
-        .sim-time-label {
-            color: var(--accent);
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 4px;
+        .sim-clock {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
         }
-        .sim-time-value {
-            font-size: 26px;
+        .sim-clock-label {
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .sim-clock-value {
+            font-size: 22px;
             font-weight: 700;
-            color: var(--accent-hover);
+            color: var(--text);
             font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
             letter-spacing: -0.02em;
+            min-width: 5ch;
+            text-align: right;
+        }
+        details.about {
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px 16px;
+        }
+        details.about > summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        details.about > summary::-webkit-details-marker { display: none; }
+        details.about > summary::before {
+            content: "\25B8";
+            color: var(--text-subtle);
+            font-size: 11px;
+            transition: transform 0.15s;
+        }
+        details.about[open] > summary::before {
+            transform: rotate(90deg);
+        }
+        details.about .about-body {
+            padding: 2px 0 12px;
+        }
+        details.about .about-body p {
+            margin: 6px 0;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+        details.about .about-body strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+        .seed-row {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+        .seed-row input[type="number"] {
+            flex: 1;
+        }
+        .icon-btn {
+            flex: none;
+            width: 40px;
+            padding: 0;
+            font-size: 18px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .stats-comparison {
             display: grid;
@@ -282,48 +354,59 @@
         .stats-table {
             background: var(--bg-card);
             border-radius: 14px;
-            overflow: hidden;
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
+            overflow-x: auto;
         }
         .stats-table table {
             width: 100%;
+            min-width: 520px;
             border-collapse: collapse;
+            table-layout: fixed;
         }
         .stats-table th {
             background: var(--bg-soft);
-            padding: 12px 10px;
-            text-align: left;
+            padding: 14px 16px;
             font-weight: 600;
             color: var(--text-muted);
-            font-size: 11px;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
+            font-size: 12px;
+            white-space: nowrap;
             border-bottom: 1px solid var(--border);
         }
+        .stats-table th.col-metric { text-align: left; width: 34%; }
+        .stats-table th.col-num { text-align: right; }
         .stats-table td {
-            padding: 12px 10px;
+            padding: 14px 16px;
             border-top: 1px solid var(--border);
-            font-size: 13px;
+            font-size: 14px;
         }
         .stats-table tr:first-child td { border-top: none; }
         .metric-name {
-            color: var(--text-muted);
-            font-size: 12px;
+            color: var(--text);
+            font-size: 13px;
             font-weight: 500;
+            white-space: nowrap;
         }
         .metric-value {
             font-weight: 600;
             text-align: right;
-            font-size: 13px;
+            font-size: 14px;
             font-family: var(--font-mono);
-            color: var(--text);
+            font-variant-numeric: tabular-nums;
+            color: var(--text-muted);
+        }
+        .metric-value.winner {
+            color: var(--accent-hover);
+            font-weight: 700;
+            background: var(--accent-soft);
+            box-shadow: inset 2px 0 0 var(--accent);
         }
         .improvement {
             text-align: right;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 13px;
             font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
         }
         .improvement.positive { color: var(--success); }
         .improvement.negative { color: var(--danger); }
@@ -369,34 +452,13 @@
             display: flex;
             gap: 10px;
         }
-        .info-box {
-            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-            border: 1px solid #c7d2fe;
-            border-radius: 14px;
-            padding: 18px 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow-sm);
-        }
-        .info-box h4 {
-            margin: 0 0 10px 0;
-            color: var(--accent-hover);
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-        .info-box p {
-            margin: 6px 0;
-            font-size: 13px;
-            color: #374151;
-            line-height: 1.55;
-        }
-        .info-box strong {
-            color: var(--accent-hover);
-            font-weight: 600;
-        }
         @media (max-width: 1100px) {
             .main-content { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 560px) {
+            .container { padding: 24px 18px; }
+            .action-bar { gap: 12px; }
+            .button-group { flex: 1; }
         }
     </style>
 </head>
@@ -412,18 +474,31 @@
 
         <div class="main-content">
             <div class="left-panel">
-                <div class="info-box">
-                    <h4>About this simulation</h4>
-                    <p>This simulation shows the benefits of queue pooling by comparing two systems driven by the <strong>same</strong> stream of arrivals and service times:</p>
-                    <p><strong>Separate Servers:</strong> Each server has its own dedicated queue. Customers join the shorter queue.</p>
-                    <p><strong>Pooled Servers:</strong> All servers share a single queue. The next customer goes to any available server.</p>
+                <div class="action-bar">
+                    <div class="button-group">
+                        <button id="toggleBtn">&#9654; Start Simulation</button>
+                        <button class="secondary" id="resetBtn">&#8635; Reset</button>
+                    </div>
+                    <div class="sim-clock">
+                        <span class="sim-clock-label">Sim Time</span>
+                        <span class="sim-clock-value" id="simulationTime">0.0 s</span>
+                    </div>
                 </div>
+
+                <details class="about">
+                    <summary>About this simulation</summary>
+                    <div class="about-body">
+                        <p>This simulation shows the benefits of queue pooling by comparing two systems driven by the <strong>same</strong> stream of arrivals and service times:</p>
+                        <p><strong>Separate Servers:</strong> Each server has its own dedicated queue. Customers join the shorter queue.</p>
+                        <p><strong>Pooled Servers:</strong> All servers share a single queue. The next customer goes to any available server.</p>
+                    </div>
+                </details>
 
                 <div class="simulation-wrapper">
                     <div class="simulation-section">
                         <div class="simulation-title">
                             Separate Servers System
-                            <span class="tag separate">Independent queues</span>
+                            <span class="tag">Independent queues</span>
                         </div>
                         <div class="simulation-area">
                             <canvas id="separateCanvas" width="960" height="250"></canvas>
@@ -433,7 +508,7 @@
                     <div class="simulation-section">
                         <div class="simulation-title">
                             Pooled Servers System
-                            <span class="tag pooled">Shared queue</span>
+                            <span class="tag">Shared queue</span>
                         </div>
                         <div class="simulation-area">
                             <canvas id="pooledCanvas" width="960" height="250"></canvas>
@@ -441,60 +516,15 @@
                     </div>
                 </div>
 
-                <div class="button-group">
-                    <button id="toggleBtn">&#9654; Start Simulation</button>
-                    <button class="secondary" id="resetBtn">&#8635; Reset</button>
-                </div>
-            </div>
-
-            <div class="right-panel">
-                <div class="controls">
-                    <div class="control-group">
-                        <h3>Customer Arrivals</h3>
-                        <label for="arrivalMean">Mean Time Between Arrivals (seconds)</label>
-                        <input type="range" id="arrivalMean" min="1" max="10" step="0.1" value="1.5">
-                        <div class="value-display" id="arrivalMeanValue">1.5 s</div>
-
-                        <label for="arrivalCV">Arrival Variability (CV)</label>
-                        <input type="range" id="arrivalCV" min="0.1" max="2" step="0.1" value="1">
-                        <div class="value-display" id="arrivalCVValue">1.0</div>
-                    </div>
-
-                    <div class="control-group">
-                        <h3>Service Time</h3>
-                        <label for="serviceMean">Mean Service Time (seconds)</label>
-                        <input type="range" id="serviceMean" min="1" max="10" step="0.1" value="1">
-                        <div class="value-display" id="serviceMeanValue">1.0 s</div>
-
-                        <label for="serviceCV">Service Variability (CV)</label>
-                        <input type="range" id="serviceCV" min="0.1" max="2" step="0.1" value="1">
-                        <div class="value-display" id="serviceCVValue">1.0</div>
-                    </div>
-
-                    <div class="control-group">
-                        <h3>Random Seed</h3>
-                        <label for="randomSeed">Seed (for reproducible results)</label>
-                        <input type="number" id="randomSeed" min="1" max="999999" value="12345">
-                        <div style="margin-top: 12px;">
-                            <button id="applySeedBtn" style="width: 100%;">Apply Seed &amp; Reset</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sim-time">
-                    <div class="sim-time-label">Simulation Time</div>
-                    <div class="sim-time-value" id="simulationTime">0.0 s</div>
-                </div>
-
                 <div class="stats-comparison">
                     <div class="stats-table">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Metric</th>
-                                    <th style="text-align: right;">Separate Servers</th>
-                                    <th style="text-align: right;">Pooled Servers</th>
-                                    <th style="text-align: right;">Impr. (%)</th>
+                                    <th class="col-metric">Metric</th>
+                                    <th class="col-num">Separate Servers</th>
+                                    <th class="col-num">Pooled Servers</th>
+                                    <th class="col-num">Improvement</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -518,6 +548,49 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="controls">
+                    <div class="control-group">
+                        <h3>Customer Arrivals</h3>
+                        <div class="control-row">
+                            <label for="arrivalMean">Mean Time Between Arrivals (seconds)</label>
+                            <span class="value-display" id="arrivalMeanValue">1.5 s</span>
+                        </div>
+                        <input type="range" id="arrivalMean" min="1" max="10" step="0.1" value="1.5">
+
+                        <div class="control-row">
+                            <label for="arrivalCV">Arrival Variability (CV)</label>
+                            <span class="value-display" id="arrivalCVValue">1.0</span>
+                        </div>
+                        <input type="range" id="arrivalCV" min="0.1" max="2" step="0.1" value="1">
+                    </div>
+
+                    <div class="control-group">
+                        <h3>Service Time</h3>
+                        <div class="control-row">
+                            <label for="serviceMean">Mean Service Time (seconds)</label>
+                            <span class="value-display" id="serviceMeanValue">1.0 s</span>
+                        </div>
+                        <input type="range" id="serviceMean" min="1" max="10" step="0.1" value="1">
+
+                        <div class="control-row">
+                            <label for="serviceCV">Service Variability (CV)</label>
+                            <span class="value-display" id="serviceCVValue">1.0</span>
+                        </div>
+                        <input type="range" id="serviceCV" min="0.1" max="2" step="0.1" value="1">
+                    </div>
+
+                    <div class="control-group">
+                        <h3>Random Seed</h3>
+                        <label for="randomSeed">Seed (for reproducible results)</label>
+                        <div class="seed-row">
+                            <input type="number" id="randomSeed" min="1" max="999999" value="12345">
+                            <button id="applySeedBtn" class="icon-btn" title="Apply seed &amp; reset" aria-label="Apply seed and reset">&#10227;</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -832,58 +905,100 @@
                 ctx.restore();
             }
 
+            function rrect(x, y, w, h, r) {
+                const rr = Math.min(r, w / 2, h / 2);
+                ctx.beginPath();
+                ctx.moveTo(x + rr, y);
+                ctx.arcTo(x + w, y, x + w, y + h, rr);
+                ctx.arcTo(x + w, y + h, x, y + h, rr);
+                ctx.arcTo(x, y + h, x, y, rr);
+                ctx.arcTo(x, y, x + w, y, rr);
+                ctx.closePath();
+            }
+
+            function drawGateway(cx, fill, label) {
+                rrect(cx - 20, L.FLOOR_Y - 58, 40, 58, 8);
+                ctx.fillStyle = fill;
+                ctx.fill();
+                ctx.save();
+                ctx.translate(cx, L.FLOOR_Y - 29);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '700 11px ' + FONT;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(label, 0, 0);
+                ctx.restore();
+                ctx.textBaseline = 'alphabetic';
+            }
+
+            function drawServerBox(sx, sy, idx) {
+                rrect(sx - 30, sy - 80, 60, 80, 10);
+                ctx.fillStyle = '#64748b';
+                ctx.fill();
+                // person glyph
+                ctx.fillStyle = '#e2e8f0';
+                ctx.beginPath();
+                ctx.arc(sx, sy - 52, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(sx, sy - 24, 15, Math.PI, 0);
+                ctx.fill();
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '600 11px ' + FONT;
+                ctx.textAlign = 'center';
+                ctx.fillText('Server ' + (idx + 1), sx, sy - 6);
+            }
+
+            const FONT = getComputedStyle(document.body).fontFamily;
+
             function draw(sys, simTime) {
-                const font = getComputedStyle(document.body).fontFamily;
                 const isPooled = sysType === 'pooled';
                 ctx.clearRect(0, 0, L.W, L.H);
 
-                ctx.strokeStyle = '#bdc3c7';
+                ctx.strokeStyle = '#e5e9f2';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(0, L.FLOOR_Y);
                 ctx.lineTo(L.W, L.FLOOR_Y);
                 ctx.stroke();
 
-                ctx.fillStyle = '#27ae60';
-                ctx.fillRect(L.ENTRANCE_X - 20, L.FLOOR_Y - 60, 40, 60);
-                ctx.fillStyle = 'white';
-                ctx.font = '12px ' + font;
-                ctx.textAlign = 'center';
-                ctx.fillText('ENTER', L.ENTRANCE_X, L.FLOOR_Y - 30);
+                drawGateway(L.ENTRANCE_X, '#10b981', 'ENTER');
 
-                ctx.strokeStyle = '#3498db';
-                ctx.setLineDash([5, 5]);
+                // Queue swimlane track(s): solid light-gray container, not dashed.
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.10)';
+                ctx.strokeStyle = '#e5e9f2';
+                ctx.lineWidth = 1;
+                ctx.font = '600 13px ' + FONT;
+                ctx.textAlign = 'center';
                 if (isPooled) {
                     const right = L.AVG_SERVER_X - L.QUEUE_HEAD_OFFSET;
                     const w = 350, left = right - w;
-                    ctx.strokeRect(left, L.FLOOR_Y - 80, w, 80);
-                    ctx.setLineDash([]);
-                    ctx.fillStyle = '#3498db';
-                    ctx.font = '14px ' + font;
-                    ctx.fillText('SHARED QUEUE', left + w / 2, L.FLOOR_Y - 90);
+                    rrect(left, L.FLOOR_Y - 80, w, 80, 10);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillText('Shared Queue', left + w / 2, L.FLOOR_Y - 90);
                 } else {
                     const w = 300;
                     const q1Left = (L.SERVER1_X - L.QUEUE_HEAD_OFFSET) - w;
                     const q2Left = (L.SERVER2_X - L.QUEUE_HEAD_OFFSET) - w;
-                    ctx.strokeRect(q1Left, L.FLOOR_Y - 150, w, 60);
-                    ctx.strokeRect(q2Left, L.FLOOR_Y - 60, w, 60);
-                    ctx.setLineDash([]);
-                    ctx.fillStyle = '#3498db';
-                    ctx.font = '14px ' + font;
-                    ctx.fillText('QUEUE 1', q1Left + w / 2, L.FLOOR_Y - 160);
-                    ctx.fillText('QUEUE 2', q2Left + w / 2, L.FLOOR_Y - 70);
+                    rrect(q1Left, L.FLOOR_Y - 150, w, 60, 10);
+                    ctx.fill();
+                    ctx.stroke();
+                    rrect(q2Left, L.FLOOR_Y - 60, w, 60, 10);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillText('Queue 1', q1Left + w / 2, L.FLOOR_Y - 160);
+                    ctx.fillText('Queue 2', q2Left + w / 2, L.FLOOR_Y - 70);
                 }
 
                 for (let i = 0; i < 2; i++) {
                     const sx = serverX(i);
                     const sy = isPooled ? L.FLOOR_Y
                         : (i === 0 ? L.FLOOR_Y - L.QUEUE_Y_OFFSET : L.FLOOR_Y);
-                    ctx.fillStyle = '#e74c3c';
-                    ctx.fillRect(sx - 30, sy - 80, 60, 80);
-                    ctx.fillStyle = 'white';
-                    ctx.font = '12px ' + font;
-                    ctx.textAlign = 'center';
-                    ctx.fillText('SERVER ' + (i + 1), sx, sy - 40);
+                    drawServerBox(sx, sy, i);
 
                     const srv = sys.servers[i];
                     if (srv && srv.serviceStartTime !== null) {
@@ -891,23 +1006,16 @@
                         const progress = span > 0
                             ? Math.min(1, Math.max(0, (simTime - srv.serviceStartTime) / span))
                             : 1;
-                        const bw = 50, bh = 4;
+                        const bw = 50, bh = 5;
                         const bx = sx - bw / 2, by = sy - 95;
-                        ctx.fillStyle = '#bdc3c7';
-                        ctx.fillRect(bx, by, bw, bh);
-                        ctx.fillStyle = '#2ecc71';
-                        ctx.fillRect(bx, by, bw * progress, bh);
-                        ctx.strokeStyle = '#95a5a6';
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(bx, by, bw, bh);
+                        ctx.fillStyle = '#e5e9f2';
+                        rrect(bx, by, bw, bh, 2.5); ctx.fill();
+                        ctx.fillStyle = '#10b981';
+                        rrect(bx, by, Math.max(bh, bw * progress), bh, 2.5); ctx.fill();
                     }
                 }
 
-                ctx.fillStyle = '#e67e22';
-                ctx.fillRect(L.EXIT_X - 20, L.FLOOR_Y - 60, 40, 60);
-                ctx.fillStyle = 'white';
-                ctx.font = '12px ' + font;
-                ctx.fillText('EXIT', L.EXIT_X, L.FLOOR_Y - 30);
+                drawGateway(L.EXIT_X, '#f59e0b', 'EXIT');
 
                 const hidden = [0, 0];
                 for (const c of sys.customers) {
@@ -917,8 +1025,8 @@
                     }
                     drawFigure(sys, c);
                 }
-                ctx.fillStyle = '#3498db';
-                ctx.font = 'bold 13px ' + font;
+                ctx.fillStyle = '#818cf8';
+                ctx.font = '700 13px ' + FONT;
                 ctx.textAlign = 'left';
                 if (isPooled) {
                     if (hidden[0] > 0) {
@@ -966,6 +1074,15 @@
                 (pct > 0 ? 'positive' : pct < 0 ? 'negative' : 'neutral');
         }
 
+        // Lower value wins; highlight the better cell, clear when tied/insufficient.
+        function markWinner(sepId, poolId, sepVal, poolVal, enough) {
+            const s = el(sepId), p = el(poolId);
+            s.classList.remove('winner');
+            p.classList.remove('winner');
+            if (!enough || Math.abs(sepVal - poolVal) < 1e-9) return;
+            (sepVal < poolVal ? s : p).classList.add('winner');
+        }
+
         function updateStats(simTime) {
             el('simulationTime').textContent = simTime.toFixed(1) + ' s';
 
@@ -983,6 +1100,8 @@
                            pooled.stats.customersServed > 5;
             setImprovement('queueImprovement', sQ, pQ, enough);
             setImprovement('waitImprovement', sW, pW, enough);
+            markWinner('separateQueueLength', 'pooledQueueLength', sQ, pQ, enough);
+            markWinner('separateWaitTime', 'pooledWaitTime', sW, pW, enough);
         }
 
         // ---- Clock / App ---------------------------------------------------
