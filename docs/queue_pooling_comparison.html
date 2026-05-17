@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Queue Pooling Comparison Simulation</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-page: #eef2f8;
@@ -27,11 +24,13 @@
             --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
             --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
             --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
         }
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: var(--font-sans);
             padding: 32px 24px;
             background:
                 radial-gradient(1200px 600px at 10% -10%, #e0e7ff 0%, transparent 60%),
@@ -233,7 +232,7 @@
             padding: 8px 12px;
             border: 1px solid var(--border-strong);
             border-radius: 8px;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: var(--font-mono);
             font-size: 13px;
             color: var(--text);
             background: var(--bg-soft);
@@ -251,7 +250,7 @@
             color: var(--accent);
             margin-bottom: 12px;
             font-size: 13px;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: var(--font-mono);
         }
         .sim-time {
             text-align: center;
@@ -273,7 +272,7 @@
             font-size: 26px;
             font-weight: 700;
             color: var(--accent-hover);
-            font-family: 'JetBrains Mono', monospace;
+            font-family: var(--font-mono);
             letter-spacing: -0.02em;
         }
         .stats-comparison {
@@ -317,14 +316,14 @@
             font-weight: 600;
             text-align: right;
             font-size: 13px;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: var(--font-mono);
             color: var(--text);
         }
         .improvement {
             text-align: right;
             font-weight: 700;
             font-size: 12px;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: var(--font-mono);
         }
         .improvement.positive { color: var(--success); }
         .improvement.negative { color: var(--danger); }
@@ -415,7 +414,7 @@
             <div class="left-panel">
                 <div class="info-box">
                     <h4>About this simulation</h4>
-                    <p>This simulation shows the benefits of queue pooling by comparing two systems:</p>
+                    <p>This simulation shows the benefits of queue pooling by comparing two systems driven by the <strong>same</strong> stream of arrivals and service times:</p>
                     <p><strong>Separate Servers:</strong> Each server has its own dedicated queue. Customers join the shorter queue.</p>
                     <p><strong>Pooled Servers:</strong> All servers share a single queue. The next customer goes to any available server.</p>
                 </div>
@@ -443,8 +442,8 @@
                 </div>
 
                 <div class="button-group">
-                    <button onclick="toggleSimulation()" id="toggleBtn">▶ Start Simulation</button>
-                    <button class="secondary" onclick="resetSimulation()">↻ Reset</button>
+                    <button id="toggleBtn">&#9654; Start Simulation</button>
+                    <button class="secondary" id="resetBtn">&#8635; Reset</button>
                 </div>
             </div>
 
@@ -455,29 +454,29 @@
                         <label for="arrivalMean">Mean Time Between Arrivals (seconds)</label>
                         <input type="range" id="arrivalMean" min="1" max="10" step="0.1" value="1.5">
                         <div class="value-display" id="arrivalMeanValue">1.5 s</div>
-                        
+
                         <label for="arrivalCV">Arrival Variability (CV)</label>
                         <input type="range" id="arrivalCV" min="0.1" max="2" step="0.1" value="1">
                         <div class="value-display" id="arrivalCVValue">1.0</div>
                     </div>
-                    
+
                     <div class="control-group">
                         <h3>Service Time</h3>
                         <label for="serviceMean">Mean Service Time (seconds)</label>
                         <input type="range" id="serviceMean" min="1" max="10" step="0.1" value="1">
                         <div class="value-display" id="serviceMeanValue">1.0 s</div>
-                        
+
                         <label for="serviceCV">Service Variability (CV)</label>
                         <input type="range" id="serviceCV" min="0.1" max="2" step="0.1" value="1">
                         <div class="value-display" id="serviceCVValue">1.0</div>
                     </div>
-                    
+
                     <div class="control-group">
                         <h3>Random Seed</h3>
                         <label for="randomSeed">Seed (for reproducible results)</label>
                         <input type="number" id="randomSeed" min="1" max="999999" value="12345">
                         <div style="margin-top: 12px;">
-                            <button onclick="applySeed()" style="width: 100%;">Apply Seed &amp; Reset</button>
+                            <button id="applySeedBtn" style="width: 100%;">Apply Seed &amp; Reset</button>
                         </div>
                     </div>
                 </div>
@@ -486,7 +485,7 @@
                     <div class="sim-time-label">Simulation Time</div>
                     <div class="sim-time-value" id="simulationTime">0.0 s</div>
                 </div>
-                
+
                 <div class="stats-comparison">
                     <div class="stats-table">
                         <table>
@@ -503,19 +502,19 @@
                                     <td class="metric-name">Average Queue Length</td>
                                     <td class="metric-value" id="separateQueueLength">0.0</td>
                                     <td class="metric-value" id="pooledQueueLength">0.0</td>
-                                    <td class="improvement neutral" id="queueImprovement">-</td>
+                                    <td class="improvement neutral" id="queueImprovement">&ndash;</td>
                                 </tr>
                                 <tr>
                                     <td class="metric-name">Average Wait Time</td>
                                     <td class="metric-value" id="separateWaitTime">0.0 s</td>
                                     <td class="metric-value" id="pooledWaitTime">0.0 s</td>
-                                    <td class="improvement neutral" id="waitImprovement">-</td>
+                                    <td class="improvement neutral" id="waitImprovement">&ndash;</td>
                                 </tr>
                                 <tr>
                                     <td class="metric-name">Total Customers Served</td>
                                     <td class="metric-value" id="separateServed">0</td>
                                     <td class="metric-value" id="pooledServed">0</td>
-                                    <td class="improvement neutral" id="servedImprovement">-</td>
+                                    <td class="improvement neutral" id="servedImprovement" title="Both systems receive an identical arrival stream, so total throughput is equal by construction.">n/a</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -526,637 +525,590 @@
     </div>
 
     <script>
-        // Shared simulation state
-        let running = false;
-        let simulationTime = 0;
-        let lastFrameTime = 0;
-        let nextArrivalTime = 0;
-        let customerId = 0;
-        let arrivalSchedule = []; // Shared arrival schedule
-        let serviceTimeMap = new Map(); // Maps customer ID to service time
-        
-        // Separate system state
-        let separateCustomers = [];
-        let separateQueues = [[], []]; // Two queues
-        let separateServers = [null, null]; // Two servers
-        let separateStats = {
-            totalWaitTime: 0,
-            totalQueueLength: 0,
-            customersServed: 0,
-            customersArrived: 0,
-            measurements: 0
-        };
-        
-        // Pooled system state
-        let pooledCustomers = [];
-        let pooledQueue = [];
-        let pooledServers = [null, null];
-        let pooledStats = {
-            totalWaitTime: 0,
-            totalQueueLength: 0,
-            customersServed: 0,
-            customersArrived: 0,
-            measurements: 0
-        };
-        
-        // Canvas setup
-        const separateCanvas = document.getElementById('separateCanvas');
-        const separateCtx = separateCanvas.getContext('2d');
-        const pooledCanvas = document.getElementById('pooledCanvas');
-        const pooledCtx = pooledCanvas.getContext('2d');
-        
-        // Position constants
-        const ENTRANCE_X = 40;
-        const QUEUE_START_X = 190;
-        const SERVER1_X = 600;
-        const SERVER2_X = 720; // Moved left to prevent queue intersection
-        const EXIT_X = 920;
-        const FLOOR_Y = 200;
-        const CUSTOMER_SPACING = 50;
-        const QUEUE_Y_OFFSET = 70; // Vertical offset between queues in separate system
-        
-        // Seeded random number generator for reproducible results
-        let randomSeed = 12345; // Default seed
-        
-        function seededRandom() {
-            // Linear congruential generator (LCG)
-            randomSeed = (randomSeed * 1664525 + 1013904223) % Math.pow(2, 32);
-            return randomSeed / Math.pow(2, 32);
-        }
-        
-        function setSeed(seed) {
-            randomSeed = seed;
-        }
-        
-        // Gamma distribution functions (using seeded random)
-        function gammaRandom(shape, scale) {
-            if (shape < 1) {
-                return gammaRandom(shape + 1, scale) * Math.pow(seededRandom(), 1/shape);
-            }
-            
-            const d = shape - 1/3;
-            const c = 1/Math.sqrt(9 * d);
-            
-            while (true) {
-                let x, v;
-                do {
-                    x = gaussianRandom();
-                    v = 1 + c * x;
-                } while (v <= 0);
-                
-                v = v * v * v;
-                const u = seededRandom();
-                
-                if (u < 1 - 0.0331 * x * x * x * x) {
-                    return d * v * scale;
+    (() => {
+        'use strict';
+
+        // ---- Configuration -------------------------------------------------
+        const CONFIG = Object.freeze({
+            SIM_DT: 1 / 60,
+            MAX_FRAME_DT: 0.05,
+            WALK_SPEED: 540,
+            UI_THROTTLE: 0.15,
+            ARRIVAL_LOOKAHEAD: 6,
+            layout: Object.freeze({
+                W: 960, H: 250,
+                ENTRANCE_X: 40,
+                SERVER1_X: 600,
+                SERVER2_X: 720,
+                AVG_SERVER_X: 660,
+                EXIT_X: 920,
+                FLOOR_Y: 200,
+                SPACING: 50,
+                QUEUE_Y_OFFSET: 70,
+                QUEUE_HEAD_OFFSET: 180,
+                MAX_VISIBLE_QUEUE: 6
+            })
+        });
+        const L = CONFIG.layout;
+
+        // ---- Seeded RNG (32-bit LCG) ---------------------------------------
+        const Rng = (() => {
+            let s = 12345;
+            return {
+                setSeed(n) {
+                    let v = Math.floor(Number(n));
+                    if (!Number.isFinite(v)) v = 12345;
+                    v = Math.min(999999, Math.max(1, v));
+                    s = v >>> 0;
+                    return v;
+                },
+                next() {
+                    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+                    return s / 4294967296;
                 }
-                
-                if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) {
-                    return d * v * scale;
+            };
+        })();
+
+        // ---- Distributions -------------------------------------------------
+        const Dist = {
+            gaussian() {
+                let u = 0, v = 0;
+                while (u === 0) u = Rng.next();
+                while (v === 0) v = Rng.next();
+                return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+            },
+            gamma(shape, scale) {
+                if (shape < 1) {
+                    return Dist.gamma(shape + 1, scale) * Math.pow(Rng.next(), 1 / shape);
                 }
+                const d = shape - 1 / 3;
+                const c = 1 / Math.sqrt(9 * d);
+                for (;;) {
+                    let x, v;
+                    do { x = Dist.gaussian(); v = 1 + c * x; } while (v <= 0);
+                    v = v * v * v;
+                    const u = Rng.next();
+                    if (u < 1 - 0.0331 * x * x * x * x) return d * v * scale;
+                    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v * scale;
+                }
+            },
+            gammaParams(mean, cv) {
+                const shape = 1 / (cv * cv);
+                return { shape, scale: mean / shape };
+            }
+        };
+
+        // ---- Live parameters ----------------------------------------------
+        const params = { arrivalMean: 1.5, arrivalCV: 1, serviceMean: 1, serviceCV: 1 };
+
+        // ---- Lazy, unbounded shared event stream ---------------------------
+        // Both systems consume THIS SAME array -> common random numbers.
+        let events = [];
+        let lastArrivalTime = 0;
+
+        function resetEvents() {
+            events = [];
+            lastArrivalTime = 0;
+        }
+
+        function ensureEventsUntil(t) {
+            while (lastArrivalTime < t + CONFIG.ARRIVAL_LOOKAHEAD) {
+                const ap = Dist.gammaParams(params.arrivalMean, params.arrivalCV);
+                lastArrivalTime += Dist.gamma(ap.shape, ap.scale);
+                const sp = Dist.gammaParams(params.serviceMean, params.serviceCV);
+                const serviceTime = Dist.gamma(sp.shape, sp.scale);
+                events.push({ id: events.length, arrivalTime: lastArrivalTime, serviceTime });
             }
         }
-        
-        function gaussianRandom() {
-            let u = 0, v = 0;
-            while (u === 0) u = seededRandom();
-            while (v === 0) v = seededRandom();
-            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+
+        // ---- Stats factory -------------------------------------------------
+        function makeStats() {
+            return {
+                totalWaitTime: 0,
+                totalQueueArea: 0,
+                customersServed: 0,
+                waitCount: 0,
+                elapsed: 0
+            };
         }
-        
-        function getGammaParams(mean, cv) {
-            const shape = 1 / (cv * cv);
-            const scale = mean / shape;
-            return { shape, scale };
-        }
-        
-        // Customer class
+
+        // ---- Customer (model + render state) -------------------------------
+        const TRANSITIONS = {
+            queued:     ['in_service'],
+            in_service: ['leaving'],
+            leaving:    []
+        };
+
         class Customer {
-            constructor(id, system, queueIndex = -1) {
-                this.id = id;
-                this.system = system; // 'separate' or 'pooled'
-                this.x = ENTRANCE_X;
-                this.y = FLOOR_Y;
-                this.state = 'arriving';
-                this.arrivalTime = simulationTime;
-                this.queueJoinTime = null;
+            constructor(ev) {
+                this.id = ev.id;
+                this.arrivalTime = ev.arrivalTime;
+                this.serviceDuration = ev.serviceTime;
                 this.serviceStartTime = null;
-                this.targetX = ENTRANCE_X;
-                this.targetY = FLOOR_Y;
-                this.queuePosition = -1;
-                this.queueIndex = queueIndex; // For separate system: 0 or 1
-                this.serverIndex = -1;
-                this.walkSpeed = 12;
-                this.animationPhase = 0;
-                this.serviceTime = serviceTimeMap.get(id) || 5; // Get predetermined service time
+                this.serviceEndTime = null;
+                this.departureTime = null;
+                this.state = 'queued';
+                this.queueIdx = 0;     // separate: 0/1; pooled: 0
+                this.queuePos = -1;
+                this.serverIdx = -1;
+                // render-only
+                this.x = L.ENTRANCE_X;
+                this.y = L.FLOOR_Y;
+                this.exitY = L.FLOOR_Y;
+                this.phase = 0;
             }
-            
-            update(deltaTime) {
-                this.animationPhase += deltaTime * 2;
-                
-                // Move towards target
-                const dx = this.targetX - this.x;
-                const dy = this.targetY - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance > this.walkSpeed) {
-                    this.x += (dx / distance) * this.walkSpeed;
-                    this.y += (dy / distance) * this.walkSpeed;
-                } else {
-                    this.x = this.targetX;
-                    this.y = this.targetY;
-                    
-                    // Handle state transitions
-                    if (this.state === 'arriving' && this.x === this.targetX) {
-                        this.state = 'queuing';
-                        this.queueJoinTime = simulationTime;
-                    } else if (this.state === 'leaving' && this.x >= EXIT_X) {
-                        return false; // Remove customer
+            setState(to) {
+                if (!TRANSITIONS[this.state].includes(to)) {
+                    throw new Error(`Invalid transition ${this.state} -> ${to}`);
+                }
+                this.state = to;
+            }
+        }
+
+        function serverX(i) { return i === 0 ? L.SERVER1_X : L.SERVER2_X; }
+
+        function target(sys, c) {
+            if (c.state === 'leaving') {
+                return { x: L.EXIT_X + 30, y: c.exitY };
+            }
+            if (c.state === 'in_service') {
+                const y = (sys.type === 'separate' && c.serverIdx === 0)
+                    ? L.FLOOR_Y - L.QUEUE_Y_OFFSET : L.FLOOR_Y;
+                return { x: serverX(c.serverIdx), y };
+            }
+            // queued
+            if (sys.type === 'separate') {
+                const x = serverX(c.queueIdx) - L.QUEUE_HEAD_OFFSET - c.queuePos * L.SPACING;
+                const y = c.queueIdx === 0 ? L.FLOOR_Y - L.QUEUE_Y_OFFSET : L.FLOOR_Y;
+                return { x, y };
+            }
+            return {
+                x: L.AVG_SERVER_X - L.QUEUE_HEAD_OFFSET - c.queuePos * L.SPACING,
+                y: L.FLOOR_Y
+            };
+        }
+
+        // ---- System (separate | pooled) ------------------------------------
+        function makeSystem(type) {
+            return {
+                type,
+                queues: type === 'separate' ? [[], []] : [[]],
+                servers: [null, null],
+                customers: [],
+                nextEventIdx: 0,
+                stats: makeStats()
+            };
+        }
+
+        let separate = makeSystem('separate');
+        let pooled = makeSystem('pooled');
+
+        function chooseQueue(sys) {
+            const t0 = sys.queues[0].length + (sys.servers[0] ? 1 : 0);
+            const t1 = sys.queues[1].length + (sys.servers[1] ? 1 : 0);
+            return t0 <= t1 ? 0 : 1;
+        }
+
+        function waitingCount(sys) {
+            return sys.type === 'separate'
+                ? sys.queues[0].length + sys.queues[1].length
+                : sys.queues[0].length;
+        }
+
+        function stepSystem(sys, dt, simTimeBefore) {
+            const simTime = simTimeBefore + dt;
+
+            // 1. Admit arrivals due by simTime (model decision, not visual)
+            while (sys.nextEventIdx < events.length &&
+                   events[sys.nextEventIdx].arrivalTime <= simTime) {
+                const c = new Customer(events[sys.nextEventIdx++]);
+                const q = sys.type === 'separate' ? chooseQueue(sys) : 0;
+                c.queueIdx = q;
+                c.queuePos = sys.queues[q].length;
+                sys.queues[q].push(c);
+                sys.customers.push(c);
+            }
+
+            // 2. Complete finished services
+            for (let i = 0; i < 2; i++) {
+                const c = sys.servers[i];
+                if (c && simTime >= c.serviceEndTime) {
+                    c.departureTime = c.serviceEndTime;
+                    c.setState('leaving');
+                    sys.stats.customersServed++;
+                    sys.servers[i] = null;
+                }
+            }
+
+            // 3. Dispatch waiting customers to free servers
+            for (let i = 0; i < 2; i++) {
+                if (sys.servers[i] !== null) continue;
+                const q = sys.type === 'separate' ? sys.queues[i] : sys.queues[0];
+                if (q.length === 0) continue;
+                const c = q.shift();
+                sys.servers[i] = c;
+                c.serverIdx = i;
+                c.serviceStartTime = simTime;
+                c.serviceEndTime = simTime + c.serviceDuration;
+                c.exitY = (sys.type === 'separate' && i === 0)
+                    ? L.FLOOR_Y - L.QUEUE_Y_OFFSET : L.FLOOR_Y;
+                c.setState('in_service');
+                sys.stats.totalWaitTime += c.serviceStartTime - c.arrivalTime;
+                sys.stats.waitCount++;
+                q.forEach((qc, idx) => { qc.queuePos = idx; });
+            }
+
+            // 4. Time-weighted queue length (waiting only)
+            sys.stats.totalQueueArea += waitingCount(sys) * dt;
+            sys.stats.elapsed += dt;
+        }
+
+        // ---- Renderer ------------------------------------------------------
+        function makeRenderer(canvasId, sysType) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+
+            function setup() {
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = L.W * dpr;
+                canvas.height = L.H * dpr;
+                canvas.style.width = L.W + 'px';
+                canvas.style.height = L.H + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+
+            function animate(sys, dt) {
+                const step = CONFIG.WALK_SPEED * dt;
+                for (const c of sys.customers) {
+                    c.phase += dt * 2;
+                    const tg = target(sys, c);
+                    const dx = tg.x - c.x, dy = tg.y - c.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist > step) {
+                        c.x += (dx / dist) * step;
+                        c.y += (dy / dist) * step;
+                    } else {
+                        c.x = tg.x;
+                        c.y = tg.y;
                     }
                 }
-                
-                return true;
+                sys.customers = sys.customers.filter(
+                    c => !(c.state === 'leaving' && c.x >= L.EXIT_X)
+                );
             }
-            
-            draw(ctx) {
+
+            function drawFigure(sys, c) {
                 ctx.save();
-                ctx.translate(this.x, this.y);
-                
-                // Walking animation
-                const bobAmount = (this.state === 'arriving' || this.state === 'leaving' || 
-                                 this.state === 'walking_to_server') ? Math.sin(this.animationPhase) * 2 : 0;
-                
+                ctx.translate(c.x, c.y);
+                const tg = target(sys, c);
+                const moving = Math.hypot(tg.x - c.x, tg.y - c.y) > 1;
+                const bob = moving ? Math.sin(c.phase) * 2 : 0;
                 ctx.strokeStyle = '#34495e';
                 ctx.lineWidth = 2;
                 ctx.fillStyle = '#34495e';
-                
-                // Head
                 ctx.beginPath();
-                ctx.arc(0, -35 + bobAmount, 8, 0, Math.PI * 2);
+                ctx.arc(0, -35 + bob, 8, 0, Math.PI * 2);
                 ctx.fill();
-                
-                // Body
                 ctx.beginPath();
-                ctx.moveTo(0, -27 + bobAmount);
-                ctx.lineTo(0, -5 + bobAmount);
+                ctx.moveTo(0, -27 + bob);
+                ctx.lineTo(0, -5 + bob);
                 ctx.stroke();
-                
-                // Arms
                 ctx.beginPath();
-                ctx.moveTo(-8, -20 + bobAmount);
-                ctx.lineTo(0, -20 + bobAmount);
-                ctx.lineTo(8, -20 + bobAmount);
+                ctx.moveTo(-8, -20 + bob);
+                ctx.lineTo(0, -20 + bob);
+                ctx.lineTo(8, -20 + bob);
                 ctx.stroke();
-                
-                // Legs with walking animation
-                const legPhase = (this.state === 'arriving' || this.state === 'leaving' || 
-                                this.state === 'walking_to_server') ? Math.sin(this.animationPhase * 2) * 5 : 0;
+                const leg = moving ? Math.sin(c.phase * 2) * 5 : 0;
                 ctx.beginPath();
-                ctx.moveTo(0, -5 + bobAmount);
-                ctx.lineTo(-5 + legPhase, 0);
-                ctx.moveTo(0, -5 + bobAmount);
-                ctx.lineTo(5 - legPhase, 0);
+                ctx.moveTo(0, -5 + bob);
+                ctx.lineTo(-5 + leg, 0);
+                ctx.moveTo(0, -5 + bob);
+                ctx.lineTo(5 - leg, 0);
                 ctx.stroke();
-                
-                // Customer ID
                 ctx.fillStyle = '#2c3e50';
-                ctx.font = '10px sans-serif';
+                ctx.font = '10px ' + getComputedStyle(document.body).fontFamily;
                 ctx.textAlign = 'center';
-                ctx.fillText(this.id.toString(), 0, -50 + bobAmount);
-                
+                ctx.fillText(String(c.id), 0, -50 + bob);
                 ctx.restore();
             }
-        }
-        
-        // Generate service time for a customer
-        function generateServiceTime() {
-            const serviceMean = parseFloat(document.getElementById('serviceMean').value);
-            const serviceCV = parseFloat(document.getElementById('serviceCV').value);
-            const params = getGammaParams(serviceMean, serviceCV);
-            return gammaRandom(params.shape, params.scale);
-        }
-        
-        // Pre-generate arrivals and service times
-        function generateArrivalSchedule() {
-            arrivalSchedule = [];
-            serviceTimeMap.clear();
-            
-            let currentTime = 0;
-            const simulationDuration = 300; // 5 minutes of pre-generated arrivals
-            
-            while (currentTime < simulationDuration) {
-                const arrivalMean = parseFloat(document.getElementById('arrivalMean').value);
-                const arrivalCV = parseFloat(document.getElementById('arrivalCV').value);
-                const params = getGammaParams(arrivalMean, arrivalCV);
-                const interarrivalTime = gammaRandom(params.shape, params.scale);
-                
-                currentTime += interarrivalTime;
-                if (currentTime < simulationDuration) {
-                    const id = arrivalSchedule.length;
-                    arrivalSchedule.push({
-                        id: id,
-                        time: currentTime
-                    });
-                    serviceTimeMap.set(id, generateServiceTime());
-                }
-            }
-            
-            nextArrivalTime = arrivalSchedule.length > 0 ? arrivalSchedule[0].time : Infinity;
-        }
-        
-        // Choose queue for separate system (join shorter queue)
-        function chooseQueue() {
-            // Count total customers in each queue (including those being served)
-            const queue1Total = separateQueues[0].length + (separateServers[0] ? 1 : 0);
-            const queue2Total = separateQueues[1].length + (separateServers[1] ? 1 : 0);
-            
-            return queue1Total <= queue2Total ? 0 : 1;
-        }
-        
-        // Process arrivals
-        function processArrivals() {
-            while (customerId < arrivalSchedule.length && simulationTime >= arrivalSchedule[customerId].time) {
-                const arrival = arrivalSchedule[customerId];
-                
-                // Create customer for separate system
-                const queueIndex = chooseQueue();
-                const separateCustomer = new Customer(arrival.id, 'separate', queueIndex);
-                separateCustomers.push(separateCustomer);
-                separateQueues[queueIndex].push(separateCustomer);
-                separateCustomer.queuePosition = separateQueues[queueIndex].length - 1;
-                
-                // Set target position for separate system (position 0 closest to server)
-                const queueY = FLOOR_Y + (queueIndex === 0 ? -QUEUE_Y_OFFSET : 0);
-                const serverX = queueIndex === 0 ? SERVER1_X : SERVER2_X;
-                separateCustomer.targetX = serverX - 180 - separateCustomer.queuePosition * CUSTOMER_SPACING;
-                separateCustomer.targetY = queueY;
-                
-                // Create customer for pooled system
-                const pooledCustomer = new Customer(arrival.id, 'pooled');
-                pooledCustomers.push(pooledCustomer);
-                pooledQueue.push(pooledCustomer);
-                pooledCustomer.queuePosition = pooledQueue.length - 1;
-                // Position 0 closest to servers (average position between both servers)
-                const averageServerX = (SERVER1_X + SERVER2_X) / 2;
-                pooledCustomer.targetX = averageServerX - 180 - pooledCustomer.queuePosition * CUSTOMER_SPACING;
-                
-                customerId++;
-                separateStats.customersArrived = customerId;
-                pooledStats.customersArrived = customerId;
-            }
-        }
-        
-        // Process separate system queues
-        function processSeparateQueues() {
-            for (let i = 0; i < 2; i++) {
-                if (separateServers[i] === null && separateQueues[i].length > 0) {
-                    const customer = separateQueues[i].shift();
-                    separateServers[i] = customer;
-                    customer.state = 'walking_to_server';
-                    customer.serverIndex = i;
-                    customer.targetX = i === 0 ? SERVER1_X : SERVER2_X;
-                    customer.targetY = i === 0 ? FLOOR_Y - QUEUE_Y_OFFSET : FLOOR_Y;
-                    
-                    // Update remaining queue positions (position 0 closest to server)
-                    separateQueues[i].forEach((c, index) => {
-                        c.queuePosition = index;
-                        const queueY = FLOOR_Y + (i === 0 ? -QUEUE_Y_OFFSET : 0);
-                        const serverX = i === 0 ? SERVER1_X : SERVER2_X;
-                        c.targetX = serverX - 180 - index * CUSTOMER_SPACING;
-                        c.targetY = queueY;
-                    });
-                }
-            }
-        }
-        
-        // Process pooled system queue
-        function processPooledQueue() {
-            for (let i = 0; i < 2; i++) {
-                if (pooledServers[i] === null && pooledQueue.length > 0) {
-                    const customer = pooledQueue.shift();
-                    pooledServers[i] = customer;
-                    customer.state = 'walking_to_server';
-                    customer.serverIndex = i;
-                    customer.targetX = i === 0 ? SERVER1_X : SERVER2_X;
-                    customer.targetY = FLOOR_Y;
-                    
-                    // Update remaining queue positions (position 0 closest to servers)
-                    pooledQueue.forEach((c, index) => {
-                        c.queuePosition = index;
-                        const averageServerX = (SERVER1_X + SERVER2_X) / 2;
-                        c.targetX = averageServerX - 180 - index * CUSTOMER_SPACING;
-                    });
-                }
-            }
-        }
-        
-        // Process servers
-        function processServers(servers, stats, customers) {
-            for (let i = 0; i < 2; i++) {
-                if (servers[i]) {
-                    const customer = servers[i];
-                    const serverX = i === 0 ? SERVER1_X : SERVER2_X;
-                    
-                    // Start service when customer reaches server
-                    if (customer.serviceStartTime === null && Math.abs(customer.x - serverX) <= 2) {
-                        customer.serviceStartTime = simulationTime;
-                        customer.state = 'being_served';
-                        
-                        // Calculate wait time (from queue join to service start)
-                        if (customer.queueJoinTime !== null) {
-                            const waitTime = simulationTime - customer.queueJoinTime;
-                            stats.totalWaitTime += waitTime;
-                        }
-                    }
-                    
-                    // Complete service
-                    if (customer.serviceStartTime && 
-                        simulationTime >= customer.serviceStartTime + customer.serviceTime) {
-                        customer.state = 'leaving';
-                        customer.targetX = EXIT_X;
-                        stats.customersServed++;
-                        servers[i] = null;
-                    }
-                }
-            }
-        }
-        
-        // Update statistics
-        function updateStats() {
-            // Update simulation time display
-            document.getElementById('simulationTime').textContent = simulationTime.toFixed(1) + ' s';
-            
-            // Calculate metrics for separate system
-            const separateQueueCount = separateQueues[0].length + separateQueues[1].length;
-            const separateAvgQueue = separateStats.measurements > 0 ? 
-                (separateStats.totalQueueLength / separateStats.measurements).toFixed(1) : '0.0';
-            const separateAvgWait = separateStats.customersServed > 0 ? 
-                (separateStats.totalWaitTime / separateStats.customersServed).toFixed(1) : '0.0';
-            
-            // Calculate metrics for pooled system
-            const pooledAvgQueue = pooledStats.measurements > 0 ? 
-                (pooledStats.totalQueueLength / pooledStats.measurements).toFixed(1) : '0.0';
-            const pooledAvgWait = pooledStats.customersServed > 0 ? 
-                (pooledStats.totalWaitTime / pooledStats.customersServed).toFixed(1) : '0.0';
-            
-            // Update display
-            document.getElementById('separateQueueLength').textContent = separateAvgQueue;
-            document.getElementById('pooledQueueLength').textContent = pooledAvgQueue;
-            document.getElementById('separateWaitTime').textContent = separateAvgWait + ' s';
-            document.getElementById('pooledWaitTime').textContent = pooledAvgWait + ' s';
-            document.getElementById('separateServed').textContent = separateStats.customersServed;
-            document.getElementById('pooledServed').textContent = pooledStats.customersServed;
-            
-            // Calculate and display improvements
-            if (separateStats.customersServed > 5 && pooledStats.customersServed > 5) {
-                // Queue length improvement
-                const queueImprovement = parseFloat(separateAvgQueue) > 0 ? 
-                    ((parseFloat(separateAvgQueue) - parseFloat(pooledAvgQueue)) / parseFloat(separateAvgQueue) * 100) : 0;
-                const queueImpElem = document.getElementById('queueImprovement');
-                queueImpElem.textContent = queueImprovement.toFixed(0) + '%';
-                queueImpElem.className = 'improvement ' + (queueImprovement > 0 ? 'positive' : queueImprovement < 0 ? 'negative' : 'neutral');
-                
-                // Wait time improvement
-                const waitImprovement = parseFloat(separateAvgWait) > 0 ? 
-                    ((parseFloat(separateAvgWait) - parseFloat(pooledAvgWait)) / parseFloat(separateAvgWait) * 100) : 0;
-                const waitImpElem = document.getElementById('waitImprovement');
-                waitImpElem.textContent = waitImprovement.toFixed(0) + '%';
-                waitImpElem.className = 'improvement ' + (waitImprovement > 0 ? 'positive' : waitImprovement < 0 ? 'negative' : 'neutral');
-                
-            }
-        }
-        
-        // Draw scene
-        function drawScene(ctx, customers, queues, servers, isPooled) {
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            
-            // Draw floor
-            ctx.strokeStyle = '#bdc3c7';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, FLOOR_Y);
-            ctx.lineTo(ctx.canvas.width, FLOOR_Y);
-            ctx.stroke();
-            
-            // Draw entrance
-            ctx.fillStyle = '#27ae60';
-            ctx.fillRect(ENTRANCE_X - 20, FLOOR_Y - 60, 40, 60);
-            ctx.fillStyle = 'white';
-            ctx.font = '12px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('ENTER', ENTRANCE_X, FLOOR_Y - 30);
-            
-            // Draw queue areas
-            if (isPooled) {
-                // Single queue area for pooled system
-                ctx.strokeStyle = '#3498db';
-                ctx.setLineDash([5, 5]);
-                const averageServerX = (SERVER1_X + SERVER2_X) / 2;
-                const queueAreaRight = averageServerX - 180;
-                const queueAreaWidth = 350;
-                const queueAreaLeft = queueAreaRight - queueAreaWidth;
-                ctx.strokeRect(queueAreaLeft, FLOOR_Y - 80, queueAreaWidth, 80);
-                ctx.setLineDash([]);
-                ctx.fillStyle = '#3498db';
-                ctx.font = '14px sans-serif';
-                ctx.fillText('SHARED QUEUE', queueAreaLeft + queueAreaWidth/2, FLOOR_Y - 90);
-            } else {
-                // Two queue areas for separate system
-                ctx.strokeStyle = '#3498db';
-                ctx.setLineDash([5, 5]);
-                const queueAreaWidth = 300;
-                // Queue 1 (top)
-                const queue1Right = SERVER1_X - 180;
-                const queue1Left = queue1Right - queueAreaWidth;
-                ctx.strokeRect(queue1Left, FLOOR_Y - 150, queueAreaWidth, 60);
-                // Queue 2 (bottom)  
-                const queue2Right = SERVER2_X - 180;
-                const queue2Left = queue2Right - queueAreaWidth;
-                ctx.strokeRect(queue2Left, FLOOR_Y - 60, queueAreaWidth, 60);
-                ctx.setLineDash([]);
-                ctx.fillStyle = '#3498db';
-                ctx.font = '14px sans-serif';
-                ctx.fillText('QUEUE 1', queue1Left + queueAreaWidth/2, FLOOR_Y - 160);
-                ctx.fillText('QUEUE 2', queue2Left + queueAreaWidth/2, FLOOR_Y - 70);
-            }
-            
-            // Draw servers
-            for (let i = 0; i < 2; i++) {
-                const serverX = i === 0 ? SERVER1_X : SERVER2_X;
-                const serverY = isPooled ? FLOOR_Y : (i === 0 ? FLOOR_Y - QUEUE_Y_OFFSET : FLOOR_Y);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fillRect(serverX - 30, serverY - 80, 60, 80);
-                ctx.fillStyle = 'white';
-                ctx.font = '12px sans-serif';
-                ctx.fillText('SERVER ' + (i + 1), serverX, serverY - 40);
-                
-                // Draw progress bar if serving
-                if (servers[i] && servers[i].serviceStartTime) {
-                    const progress = Math.min(1, (simulationTime - servers[i].serviceStartTime) / servers[i].serviceTime);
-                    const barWidth = 50;
-                    const barHeight = 4;
-                    const barX = serverX - barWidth / 2;
-                    const barY = serverY - 95;
-                    
-                    ctx.fillStyle = '#bdc3c7';
-                    ctx.fillRect(barX, barY, barWidth, barHeight);
-                    ctx.fillStyle = '#2ecc71';
-                    ctx.fillRect(barX, barY, barWidth * progress, barHeight);
-                    ctx.strokeStyle = '#95a5a6';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(barX, barY, barWidth, barHeight);
-                }
-            }
-            
-            // Draw exit
-            ctx.fillStyle = '#e67e22';
-            ctx.fillRect(EXIT_X - 20, FLOOR_Y - 60, 40, 60);
-            ctx.fillStyle = 'white';
-            ctx.fillText('EXIT', EXIT_X, FLOOR_Y - 30);
-            
-            // Draw customers
-            customers.forEach(customer => customer.draw(ctx));
-        }
-        
-        // Update controls
-        document.getElementById('arrivalMean').addEventListener('input', function() {
-            document.getElementById('arrivalMeanValue').textContent = this.value + ' s';
-        });
-        
-        document.getElementById('arrivalCV').addEventListener('input', function() {
-            document.getElementById('arrivalCVValue').textContent = this.value;
-        });
-        
-        document.getElementById('serviceMean').addEventListener('input', function() {
-            document.getElementById('serviceMeanValue').textContent = this.value + ' s';
-        });
-        
-        document.getElementById('serviceCV').addEventListener('input', function() {
-            document.getElementById('serviceCVValue').textContent = this.value;
-        });
-        
-        // Apply seed function
-        function applySeed() {
-            const seedValue = parseInt(document.getElementById('randomSeed').value);
-            if (seedValue && seedValue > 0) {
-                setSeed(seedValue);
-                resetSimulation();
-            }
-        }
-        
-        // Simulation control
-        function toggleSimulation() {
-            running = !running;
-            const toggleBtn = document.getElementById('toggleBtn');
-            
-            if (running) {
-                if (simulationTime === 0) {
-                    generateArrivalSchedule();
-                }
-                toggleBtn.textContent = '❚❚ Stop Simulation';
-                lastFrameTime = performance.now();
-                requestAnimationFrame(animate);
-            } else {
-                toggleBtn.textContent = '▶ Resume Simulation';
-            }
-        }
-        
-        function resetSimulation() {
-            running = false;
-            simulationTime = 0;
-            lastFrameTime = 0;
-            customerId = 0;
-            
-            // Reset random seed for reproducible results
-            const seedValue = parseInt(document.getElementById('randomSeed').value) || 12345;
-            setSeed(seedValue);
-            
-            separateCustomers = [];
-            separateQueues = [[], []];
-            separateServers = [null, null];
-            separateStats = {
-                totalWaitTime: 0,
-                totalQueueLength: 0,
-                customersServed: 0,
-                customersArrived: 0,
-                measurements: 0
-            };
-            
-            pooledCustomers = [];
-            pooledQueue = [];
-            pooledServers = [null, null];
-            pooledStats = {
-                totalWaitTime: 0,
-                totalQueueLength: 0,
-                customersServed: 0,
-                customersArrived: 0,
-                measurements: 0
-            };
-            
-            arrivalSchedule = [];
-            serviceTimeMap.clear();
-            
-            document.getElementById('toggleBtn').textContent = '▶ Start Simulation';
 
-            // Reset improvement displays
-            ['queueImprovement', 'waitImprovement', 'servedImprovement'].forEach(id => {
-                const elem = document.getElementById(id);
-                elem.textContent = '-';
-                elem.className = 'improvement neutral';
-            });
-            
-            updateStats();
-            drawScene(separateCtx, separateCustomers, separateQueues, separateServers, false);
-            drawScene(pooledCtx, pooledCustomers, pooledQueue, pooledServers, true);
-        }
-        
-        // Animation loop
-        function animate(currentTime) {
-            if (!running) return;
-            
-            const deltaTime = (currentTime - lastFrameTime) / 1000;
-            lastFrameTime = currentTime;
-            simulationTime += deltaTime;
-            
-            // Process arrivals
-            processArrivals();
-            
-            // Process queues
-            processSeparateQueues();
-            processPooledQueue();
-            
-            // Process servers
-            processServers(separateServers, separateStats, separateCustomers);
-            processServers(pooledServers, pooledStats, pooledCustomers);
-            
-            // Update customers
-            separateCustomers = separateCustomers.filter(customer => customer.update(deltaTime));
-            pooledCustomers = pooledCustomers.filter(customer => customer.update(deltaTime));
-            
-            // Update statistics
-            const separateQueueCount = separateQueues[0].length + separateQueues[1].length;
-            separateStats.totalQueueLength += separateQueueCount * deltaTime;
-            separateStats.measurements += deltaTime;
-            
-            pooledStats.totalQueueLength += pooledQueue.length * deltaTime;
-            pooledStats.measurements += deltaTime;
-            
-            
-            // Update displays periodically
-            if (Math.floor(simulationTime) !== Math.floor(simulationTime - deltaTime)) {
-                updateStats();
+            function draw(sys, simTime) {
+                const font = getComputedStyle(document.body).fontFamily;
+                const isPooled = sysType === 'pooled';
+                ctx.clearRect(0, 0, L.W, L.H);
+
+                ctx.strokeStyle = '#bdc3c7';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, L.FLOOR_Y);
+                ctx.lineTo(L.W, L.FLOOR_Y);
+                ctx.stroke();
+
+                ctx.fillStyle = '#27ae60';
+                ctx.fillRect(L.ENTRANCE_X - 20, L.FLOOR_Y - 60, 40, 60);
+                ctx.fillStyle = 'white';
+                ctx.font = '12px ' + font;
+                ctx.textAlign = 'center';
+                ctx.fillText('ENTER', L.ENTRANCE_X, L.FLOOR_Y - 30);
+
+                ctx.strokeStyle = '#3498db';
+                ctx.setLineDash([5, 5]);
+                if (isPooled) {
+                    const right = L.AVG_SERVER_X - L.QUEUE_HEAD_OFFSET;
+                    const w = 350, left = right - w;
+                    ctx.strokeRect(left, L.FLOOR_Y - 80, w, 80);
+                    ctx.setLineDash([]);
+                    ctx.fillStyle = '#3498db';
+                    ctx.font = '14px ' + font;
+                    ctx.fillText('SHARED QUEUE', left + w / 2, L.FLOOR_Y - 90);
+                } else {
+                    const w = 300;
+                    const q1Left = (L.SERVER1_X - L.QUEUE_HEAD_OFFSET) - w;
+                    const q2Left = (L.SERVER2_X - L.QUEUE_HEAD_OFFSET) - w;
+                    ctx.strokeRect(q1Left, L.FLOOR_Y - 150, w, 60);
+                    ctx.strokeRect(q2Left, L.FLOOR_Y - 60, w, 60);
+                    ctx.setLineDash([]);
+                    ctx.fillStyle = '#3498db';
+                    ctx.font = '14px ' + font;
+                    ctx.fillText('QUEUE 1', q1Left + w / 2, L.FLOOR_Y - 160);
+                    ctx.fillText('QUEUE 2', q2Left + w / 2, L.FLOOR_Y - 70);
+                }
+
+                for (let i = 0; i < 2; i++) {
+                    const sx = serverX(i);
+                    const sy = isPooled ? L.FLOOR_Y
+                        : (i === 0 ? L.FLOOR_Y - L.QUEUE_Y_OFFSET : L.FLOOR_Y);
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.fillRect(sx - 30, sy - 80, 60, 80);
+                    ctx.fillStyle = 'white';
+                    ctx.font = '12px ' + font;
+                    ctx.textAlign = 'center';
+                    ctx.fillText('SERVER ' + (i + 1), sx, sy - 40);
+
+                    const srv = sys.servers[i];
+                    if (srv && srv.serviceStartTime !== null) {
+                        const span = srv.serviceEndTime - srv.serviceStartTime;
+                        const progress = span > 0
+                            ? Math.min(1, Math.max(0, (simTime - srv.serviceStartTime) / span))
+                            : 1;
+                        const bw = 50, bh = 4;
+                        const bx = sx - bw / 2, by = sy - 95;
+                        ctx.fillStyle = '#bdc3c7';
+                        ctx.fillRect(bx, by, bw, bh);
+                        ctx.fillStyle = '#2ecc71';
+                        ctx.fillRect(bx, by, bw * progress, bh);
+                        ctx.strokeStyle = '#95a5a6';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(bx, by, bw, bh);
+                    }
+                }
+
+                ctx.fillStyle = '#e67e22';
+                ctx.fillRect(L.EXIT_X - 20, L.FLOOR_Y - 60, 40, 60);
+                ctx.fillStyle = 'white';
+                ctx.font = '12px ' + font;
+                ctx.fillText('EXIT', L.EXIT_X, L.FLOOR_Y - 30);
+
+                const hidden = [0, 0];
+                for (const c of sys.customers) {
+                    if (c.state === 'queued' && c.queuePos >= L.MAX_VISIBLE_QUEUE) {
+                        hidden[c.queueIdx]++;
+                        continue;
+                    }
+                    drawFigure(sys, c);
+                }
+                ctx.fillStyle = '#3498db';
+                ctx.font = 'bold 13px ' + font;
+                ctx.textAlign = 'left';
+                if (isPooled) {
+                    if (hidden[0] > 0) {
+                        const left = (L.AVG_SERVER_X - L.QUEUE_HEAD_OFFSET) - 350;
+                        ctx.fillText('+' + hidden[0] + ' more', left + 6, L.FLOOR_Y - 30);
+                    }
+                } else {
+                    if (hidden[0] > 0) {
+                        const left = (L.SERVER1_X - L.QUEUE_HEAD_OFFSET) - 300;
+                        ctx.fillText('+' + hidden[0] + ' more', left + 6, L.FLOOR_Y - 100);
+                    }
+                    if (hidden[1] > 0) {
+                        const left = (L.SERVER2_X - L.QUEUE_HEAD_OFFSET) - 300;
+                        ctx.fillText('+' + hidden[1] + ' more', left + 6, L.FLOOR_Y - 10);
+                    }
+                }
             }
-            
-            // Draw scenes
-            drawScene(separateCtx, separateCustomers, separateQueues, separateServers, false);
-            drawScene(pooledCtx, pooledCustomers, pooledQueue, pooledServers, true);
-            
-            requestAnimationFrame(animate);
+
+            return { setup, animate, draw };
         }
-        
-        // Initialize
-        drawScene(separateCtx, separateCustomers, separateQueues, separateServers, false);
-        drawScene(pooledCtx, pooledCustomers, pooledQueue, pooledServers, true);
+
+        const sepRenderer = makeRenderer('separateCanvas', 'separate');
+        const poolRenderer = makeRenderer('pooledCanvas', 'pooled');
+
+        // ---- Stats DOM -----------------------------------------------------
+        const el = id => document.getElementById(id);
+
+        function avgQueue(sys) {
+            return sys.stats.elapsed > 0 ? sys.stats.totalQueueArea / sys.stats.elapsed : 0;
+        }
+        function avgWait(sys) {
+            return sys.stats.waitCount > 0 ? sys.stats.totalWaitTime / sys.stats.waitCount : 0;
+        }
+
+        function setImprovement(id, sepVal, poolVal, enough) {
+            const e = el(id);
+            if (!enough || sepVal <= 0) {
+                e.textContent = '–';
+                e.className = 'improvement neutral';
+                return;
+            }
+            const pct = ((sepVal - poolVal) / sepVal) * 100;
+            e.textContent = pct.toFixed(0) + '%';
+            e.className = 'improvement ' +
+                (pct > 0 ? 'positive' : pct < 0 ? 'negative' : 'neutral');
+        }
+
+        function updateStats(simTime) {
+            el('simulationTime').textContent = simTime.toFixed(1) + ' s';
+
+            const sQ = avgQueue(separate), pQ = avgQueue(pooled);
+            const sW = avgWait(separate), pW = avgWait(pooled);
+
+            el('separateQueueLength').textContent = sQ.toFixed(1);
+            el('pooledQueueLength').textContent = pQ.toFixed(1);
+            el('separateWaitTime').textContent = sW.toFixed(1) + ' s';
+            el('pooledWaitTime').textContent = pW.toFixed(1) + ' s';
+            el('separateServed').textContent = separate.stats.customersServed;
+            el('pooledServed').textContent = pooled.stats.customersServed;
+
+            const enough = separate.stats.customersServed > 5 &&
+                           pooled.stats.customersServed > 5;
+            setImprovement('queueImprovement', sQ, pQ, enough);
+            setImprovement('waitImprovement', sW, pW, enough);
+        }
+
+        // ---- Clock / App ---------------------------------------------------
+        let running = false;
+        let simTime = 0;
+        let acc = 0;
+        let uiAcc = 0;
+        let lastFrame = 0;
+        let rafId = null;
+        let pausedByHidden = false;
+
+        function stepSimulation(dt) {
+            ensureEventsUntil(simTime + dt);
+            stepSystem(separate, dt, simTime);
+            stepSystem(pooled, dt, simTime);
+            simTime += dt;
+        }
+
+        function drawAll() {
+            sepRenderer.draw(separate, simTime);
+            poolRenderer.draw(pooled, simTime);
+        }
+
+        function frame(now) {
+            if (!running) return;
+            const frameDt = Math.min((now - lastFrame) / 1000, CONFIG.MAX_FRAME_DT);
+            lastFrame = now;
+            acc += frameDt;
+            while (acc >= CONFIG.SIM_DT) {
+                stepSimulation(CONFIG.SIM_DT);
+                acc -= CONFIG.SIM_DT;
+            }
+            sepRenderer.animate(separate, frameDt);
+            poolRenderer.animate(pooled, frameDt);
+            uiAcc += frameDt;
+            if (uiAcc >= CONFIG.UI_THROTTLE) {
+                updateStats(simTime);
+                uiAcc = 0;
+            }
+            drawAll();
+            rafId = requestAnimationFrame(frame);
+        }
+
+        function setButton() {
+            el('toggleBtn').innerHTML = running
+                ? '&#10074;&#10074; Pause Simulation'
+                : (simTime > 0 ? '&#9654; Resume Simulation' : '&#9654; Start Simulation');
+        }
+
+        function start() {
+            if (running) return;
+            running = true;
+            lastFrame = performance.now();
+            acc = 0;
+            setButton();
+            rafId = requestAnimationFrame(frame);
+        }
+
+        function pause() {
+            running = false;
+            if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+            setButton();
+        }
+
+        function toggle() {
+            if (running) pause(); else start();
+        }
+
+        function reset() {
+            pause();
+            simTime = 0;
+            acc = 0;
+            uiAcc = 0;
+            Rng.setSeed(el('randomSeed').value);
+            resetEvents();
+            separate = makeSystem('separate');
+            pooled = makeSystem('pooled');
+            updateStats(0);
+            drawAll();
+            setButton();
+        }
+
+        function applySeed() {
+            const v = Rng.setSeed(el('randomSeed').value);
+            el('randomSeed').value = v;
+            reset();
+        }
+
+        // ---- UI wiring -----------------------------------------------------
+        function bindSlider(id, key, fmt) {
+            const input = el(id);
+            const out = el(id + 'Value');
+            const sync = () => {
+                params[key] = parseFloat(input.value);
+                out.textContent = fmt(input.value);
+            };
+            input.addEventListener('input', sync);
+            sync();
+        }
+
+        bindSlider('arrivalMean', 'arrivalMean', v => parseFloat(v).toFixed(1) + ' s');
+        bindSlider('arrivalCV', 'arrivalCV', v => parseFloat(v).toFixed(1));
+        bindSlider('serviceMean', 'serviceMean', v => parseFloat(v).toFixed(1) + ' s');
+        bindSlider('serviceCV', 'serviceCV', v => parseFloat(v).toFixed(1));
+
+        el('toggleBtn').addEventListener('click', toggle);
+        el('resetBtn').addEventListener('click', reset);
+        el('applySeedBtn').addEventListener('click', applySeed);
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (running) { pausedByHidden = true; pause(); }
+            } else if (pausedByHidden) {
+                pausedByHidden = false;
+                start();
+            }
+        });
+
+        // ---- Init ----------------------------------------------------------
+        sepRenderer.setup();
+        poolRenderer.setup();
+        Rng.setSeed(el('randomSeed').value);
+        updateStats(0);
+        drawAll();
+        setButton();
+    })();
     </script>
 </body>
 </html>
