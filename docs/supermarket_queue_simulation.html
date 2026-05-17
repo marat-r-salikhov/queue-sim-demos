@@ -73,7 +73,7 @@
             letter-spacing: -0.025em;
         }
         .subtitle {
-            color: var(--text-muted);
+            color: #4b5563;
             margin: 0;
             font-size: 15px;
         }
@@ -125,10 +125,8 @@
         .control-group h3 {
             margin: 0 0 16px 0;
             color: var(--text);
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
+            font-size: 15px;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -155,8 +153,9 @@
             background: var(--border);
             border-radius: 999px;
             outline: none;
-            margin: 6px 0 4px;
+            margin: 6px 0 18px;
         }
+        .control-group input[type="range"]:last-child { margin-bottom: 0; }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -198,13 +197,92 @@
             box-shadow: 0 0 0 3px var(--accent-soft);
             background: #fff;
         }
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+        .control-row label { margin-bottom: 0; }
         .value-display {
+            flex: none;
             text-align: right;
             font-weight: 600;
             color: var(--accent);
-            margin-bottom: 14px;
             font-size: 13px;
             font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 18px;
+            box-shadow: var(--shadow-sm);
+        }
+        .sim-clock { display: flex; align-items: baseline; gap: 10px; }
+        .sim-clock-label { color: var(--text-muted); font-size: 12px; font-weight: 600; }
+        .sim-clock-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
+            min-width: 5ch;
+            text-align: right;
+        }
+        details.about {
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px 16px;
+        }
+        details.about > summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        details.about > summary::-webkit-details-marker { display: none; }
+        details.about > summary::before {
+            content: "\25B8";
+            color: var(--text-subtle);
+            font-size: 11px;
+            transition: transform 0.15s;
+        }
+        details.about[open] > summary::before { transform: rotate(90deg); }
+        details.about .about-body { padding: 2px 0 12px; }
+        details.about .about-body p {
+            margin: 6px 0;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+        details.about .about-body strong { color: var(--text); font-weight: 600; }
+        .seed-row { display: flex; gap: 8px; align-items: stretch; }
+        .seed-row input[type="number"] { flex: 1; }
+        .icon-btn {
+            flex: none;
+            width: 40px;
+            padding: 0;
+            font-size: 18px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .stats {
             display: grid;
@@ -226,33 +304,39 @@
             transform: translateY(-1px);
             box-shadow: var(--shadow-md);
         }
+        .stat-card.c-queue { --c: rgb(52, 152, 219); }
+        .stat-card.c-rate  { --c: rgb(243, 156, 18); }
+        .stat-card.c-wait  { --c: rgb(231, 76, 60); }
+        .stat-card.c-util  { --c: rgb(155, 89, 182); }
+        .stat-card.c-serv  { --c: var(--success); }
         .stat-card::before {
             content: "";
             position: absolute;
             top: 0; left: 0;
-            width: 3px;
+            width: 4px;
             height: 100%;
-            background: var(--accent);
-            opacity: 0.7;
+            background: var(--c, var(--accent));
         }
-        .stat-card:nth-child(2)::before { background: var(--warn); }
-        .stat-card:nth-child(3)::before { background: var(--danger); }
-        .stat-card:nth-child(4)::before { background: var(--purple); }
-        .stat-card:nth-child(5)::before { background: var(--success); }
         .stat-label {
-            color: var(--text-muted);
+            color: var(--text-subtle);
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 6px;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
         }
         .stat-value {
-            font-size: 26px;
-            font-weight: 700;
-            color: var(--text);
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--c, var(--text));
             font-family: var(--font-mono);
             letter-spacing: -0.02em;
+        }
+        .var {
+            font-style: italic;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            color: var(--c, var(--text-muted));
         }
         .charts {
             display: grid;
@@ -275,6 +359,10 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
         }
         .chart-container {
             background: var(--bg-card);
@@ -285,6 +373,18 @@
             height: 280px;
             box-shadow: var(--shadow-sm);
         }
+        .chart-empty {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-subtle);
+            font-size: 13px;
+            font-weight: 500;
+            pointer-events: none;
+        }
+        .chart-container.has-data .chart-empty { display: none; }
         button {
             background: var(--accent);
             color: white;
@@ -325,6 +425,11 @@
             .main-content { grid-template-columns: 1fr; }
             .charts { grid-template-columns: 1fr; }
         }
+        @media (max-width: 560px) {
+            .container { padding: 24px 18px; }
+            .action-bar { gap: 12px; }
+            .button-group { flex: 1; }
+        }
     </style>
 </head>
 <body>
@@ -334,38 +439,52 @@
                 <h1>Supermarket Cashier Simulation</h1>
                 <p class="subtitle">Understanding queue dynamics in service operations</p>
             </div>
-            <div class="badge">M/G/1 Queue</div>
+            <div class="badge">Single Cashier</div>
         </div>
 
         <div class="main-content">
             <div class="left-panel">
+                <div class="action-bar">
+                    <div class="button-group">
+                        <button id="toggleBtn">&#9654; Start Simulation</button>
+                        <button class="secondary" id="resetBtn">&#8635; Reset</button>
+                    </div>
+                    <div class="sim-clock">
+                        <span class="sim-clock-label">Elapsed</span>
+                        <span class="sim-clock-value" id="elapsedTime">0.0 s</span>
+                    </div>
+                </div>
+
+                <details class="about">
+                    <summary>About this simulation</summary>
+                    <div class="about-body">
+                        <p>Customers arrive at random and wait in a single line for one cashier. Each person takes a variable amount of time to check out.</p>
+                        <p>Drag the controls to change how often people arrive and how long checkout takes, then watch how the line length and waiting time respond.</p>
+                    </div>
+                </details>
+
                 <div class="simulation-area">
                     <canvas id="simCanvas" width="1140" height="300"></canvas>
                 </div>
 
-                <div class="button-group">
-                    <button id="toggleBtn">&#9654; Start Simulation</button>
-                    <button class="secondary" id="resetBtn">&#8635; Reset</button>
-                </div>
-
                 <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-label">Average Queue Length (L)</div>
+                    <div class="stat-card c-queue">
+                        <div class="stat-label">Average Queue Length (<span class="var">L</span>)</div>
                         <div class="stat-value" id="avgQueueLength">0.0</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Arrival Rate (&lambda;)</div>
+                    <div class="stat-card c-rate">
+                        <div class="stat-label">Arrival Rate (<span class="var">&lambda;</span>)</div>
                         <div class="stat-value" id="arrivalRate">0.000 /s</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Average Wait Time (W)</div>
+                    <div class="stat-card c-wait">
+                        <div class="stat-label">Average Wait Time (<span class="var">W</span>)</div>
                         <div class="stat-value" id="avgWaitTime">0.0 s</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card c-util">
                         <div class="stat-label">Server Utilization</div>
                         <div class="stat-value" id="utilization">0%</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card c-serv">
                         <div class="stat-label">Average Service Time</div>
                         <div class="stat-value" id="avgServiceTime">0.0 s</div>
                     </div>
@@ -374,18 +493,22 @@
                 <div class="charts">
                     <div class="chart-container">
                         <canvas id="queueChart"></canvas>
+                        <div class="chart-empty">Awaiting simulation data&hellip;</div>
                     </div>
                     <div class="chart-container">
                         <canvas id="waitChart"></canvas>
+                        <div class="chart-empty">Awaiting simulation data&hellip;</div>
                     </div>
                 </div>
 
                 <div class="charts" style="margin-top: 20px;">
                     <div class="chart-container">
                         <canvas id="arrivalRateChart"></canvas>
+                        <div class="chart-empty">Awaiting simulation data&hellip;</div>
                     </div>
                     <div class="chart-container">
                         <canvas id="utilizationChart"></canvas>
+                        <div class="chart-empty">Awaiting simulation data&hellip;</div>
                     </div>
                 </div>
             </div>
@@ -393,33 +516,41 @@
             <div class="right-panel">
                 <div class="controls">
                     <div class="control-group">
-                        <h3>Customers</h3>
-                        <label for="arrivalMean">Mean Time Between Arrivals (seconds)</label>
+                        <h3>Customer Arrivals</h3>
+                        <div class="control-row">
+                            <label for="arrivalMean">Mean Time Between Arrivals (seconds)</label>
+                            <span class="value-display" id="arrivalMeanValue">2.0 s</span>
+                        </div>
                         <input type="range" id="arrivalMean" min="1" max="10" step="0.1" value="2">
-                        <div class="value-display" id="arrivalMeanValue">2.0 s</div>
 
-                        <label for="arrivalCV">Arrival Time Variability (CV)</label>
+                        <div class="control-row">
+                            <label for="arrivalCV">Arrival Time Variability (CV)</label>
+                            <span class="value-display" id="arrivalCVValue">0.1</span>
+                        </div>
                         <input type="range" id="arrivalCV" min="0.1" max="2" step="0.1" value="0.1">
-                        <div class="value-display" id="arrivalCVValue">0.1</div>
                     </div>
 
                     <div class="control-group">
                         <h3>Cashier</h3>
-                        <label for="serviceMean">Mean Service Time (seconds)</label>
+                        <div class="control-row">
+                            <label for="serviceMean">Mean Service Time (seconds)</label>
+                            <span class="value-display" id="serviceMeanValue">1.8 s</span>
+                        </div>
                         <input type="range" id="serviceMean" min="1" max="10" step="0.1" value="1.8">
-                        <div class="value-display" id="serviceMeanValue">1.8 s</div>
 
-                        <label for="serviceCV">Service Time Variability (CV)</label>
+                        <div class="control-row">
+                            <label for="serviceCV">Service Time Variability (CV)</label>
+                            <span class="value-display" id="serviceCVValue">0.1</span>
+                        </div>
                         <input type="range" id="serviceCV" min="0.1" max="2" step="0.1" value="0.1">
-                        <div class="value-display" id="serviceCVValue">0.1</div>
                     </div>
 
                     <div class="control-group">
                         <h3>Random Seed</h3>
                         <label for="randomSeed">Seed (for reproducible results)</label>
-                        <input type="number" id="randomSeed" min="1" max="999999" value="12345">
-                        <div style="margin-top: 12px;">
-                            <button id="applySeedBtn" style="width: 100%;">Apply Seed &amp; Reset</button>
+                        <div class="seed-row">
+                            <input type="number" id="randomSeed" min="1" max="999999" value="12345">
+                            <button id="applySeedBtn" class="icon-btn" title="Apply seed &amp; reset" aria-label="Apply seed and reset">&#10227;</button>
                         </div>
                     </div>
                 </div>
@@ -586,7 +717,7 @@
             }
         }
 
-        // ---- System (single M/G/1) -----------------------------------------
+        // ---- System (single cashier, single line) --------------------------
         function makeSystem() {
             return {
                 queue: [],
@@ -709,61 +840,137 @@
                 ctx.restore();
             }
 
+            function rrect(x, y, w, h, r) {
+                const rr = Math.min(r, w / 2, h / 2);
+                ctx.beginPath();
+                ctx.moveTo(x + rr, y);
+                ctx.arcTo(x + w, y, x + w, y + h, rr);
+                ctx.arcTo(x + w, y + h, x, y + h, rr);
+                ctx.arcTo(x, y + h, x, y, rr);
+                ctx.arcTo(x, y, x + w, y, rr);
+                ctx.closePath();
+            }
+
+            const FONT = getComputedStyle(document.body).fontFamily;
+
+            function drawDoor(cx, accent, label, arrow) {
+                const w = 46, h = 66, x = cx - w / 2, y = L.FLOOR_Y - h;
+                rrect(x, y, w, h, 8);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = accent;
+                ctx.stroke();
+                // door leaf
+                rrect(x + 8, y + 8, w - 16, h - 16, 4);
+                ctx.fillStyle = accent + '22';
+                ctx.fill();
+                // divider + handle
+                ctx.strokeStyle = accent;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(cx, y + 8);
+                ctx.lineTo(cx, y + h - 8);
+                ctx.stroke();
+                ctx.fillStyle = accent;
+                ctx.beginPath();
+                ctx.arc(cx + (arrow ? 5 : 5), y + h / 2, 2.2, 0, Math.PI * 2);
+                ctx.arc(cx - 5, y + h / 2, 2.2, 0, Math.PI * 2);
+                ctx.fill();
+                if (arrow) {
+                    ctx.strokeStyle = accent;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(cx + w / 2 + 6, L.FLOOR_Y - h / 2);
+                    ctx.lineTo(cx + w / 2 + 18, L.FLOOR_Y - h / 2);
+                    ctx.moveTo(cx + w / 2 + 13, L.FLOOR_Y - h / 2 - 5);
+                    ctx.lineTo(cx + w / 2 + 18, L.FLOOR_Y - h / 2);
+                    ctx.lineTo(cx + w / 2 + 13, L.FLOOR_Y - h / 2 + 5);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = accent;
+                ctx.font = '600 11px ' + FONT;
+                ctx.textAlign = 'center';
+                ctx.fillText(label, cx, L.FLOOR_Y + 18);
+            }
+
+            function drawStanchion(x) {
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(x, L.FLOOR_Y);
+                ctx.lineTo(x, L.FLOOR_Y - 34);
+                ctx.stroke();
+                ctx.fillStyle = '#94a3b8';
+                ctx.beginPath();
+                ctx.arc(x, L.FLOOR_Y - 37, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            function drawCashier() {
+                // counter + register
+                rrect(L.SERVER_X - 36, L.FLOOR_Y - 30, 72, 30, 5);
+                ctx.fillStyle = '#94a3b8';
+                ctx.fill();
+                rrect(L.SERVER_X - 15, L.FLOOR_Y - 46, 30, 16, 3);
+                ctx.fillStyle = '#475569';
+                ctx.fill();
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fillRect(L.SERVER_X - 11, L.FLOOR_Y - 43, 22, 7);
+                // flat avatar behind the counter
+                ctx.save();
+                ctx.translate(L.SERVER_X, L.FLOOR_Y - 30);
+                ctx.fillStyle = '#1e3a8a';
+                ctx.beginPath();
+                ctx.arc(0, -40, 11, Math.PI, 0);
+                ctx.fill();
+                ctx.fillStyle = '#f1d4b8';
+                ctx.beginPath();
+                ctx.arc(0, -36, 9, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#4f46e5';
+                rrect(-14, -27, 28, 24, 6);
+                ctx.fill();
+                ctx.restore();
+            }
+
             function draw(sys, simTime) {
-                const font = getComputedStyle(document.body).fontFamily;
                 ctx.clearRect(0, 0, L.W, L.H);
 
-                ctx.strokeStyle = '#bdc3c7';
-                ctx.lineWidth = 2;
+                // grounded floor
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.08)';
+                ctx.fillRect(0, L.FLOOR_Y, L.W, L.H - L.FLOOR_Y);
+                ctx.strokeStyle = '#e5e9f2';
+                ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(0, L.FLOOR_Y);
                 ctx.lineTo(L.W, L.FLOOR_Y);
                 ctx.stroke();
 
-                ctx.fillStyle = '#27ae60';
-                ctx.fillRect(L.ENTRANCE_X - 20, L.FLOOR_Y - 60, 40, 60);
-                ctx.fillStyle = 'white';
-                ctx.font = '12px ' + font;
+                // queue floor mat
+                rrect(L.QUEUE_BOX_LEFT, L.FLOOR_Y - 80, L.QUEUE_BOX_WIDTH, 80, 10);
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.10)';
+                ctx.fill();
+                ctx.strokeStyle = '#e5e9f2';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                drawStanchion(L.QUEUE_BOX_LEFT + 10);
+                drawStanchion(L.QUEUE_BOX_LEFT + L.QUEUE_BOX_WIDTH - 10);
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(L.QUEUE_BOX_LEFT + 10, L.FLOOR_Y - 35);
+                ctx.quadraticCurveTo(
+                    L.QUEUE_BOX_LEFT + L.QUEUE_BOX_WIDTH / 2, L.FLOOR_Y - 24,
+                    L.QUEUE_BOX_LEFT + L.QUEUE_BOX_WIDTH - 10, L.FLOOR_Y - 35);
+                ctx.stroke();
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '600 13px ' + FONT;
                 ctx.textAlign = 'center';
-                ctx.fillText('ENTER', L.ENTRANCE_X, L.FLOOR_Y - 30);
+                ctx.fillText('Queue', L.QUEUE_BOX_LEFT + L.QUEUE_BOX_WIDTH / 2, L.FLOOR_Y - 90);
 
-                ctx.strokeStyle = '#3498db';
-                ctx.setLineDash([5, 5]);
-                ctx.strokeRect(L.QUEUE_BOX_LEFT, L.FLOOR_Y - 80, L.QUEUE_BOX_WIDTH, 80);
-                ctx.setLineDash([]);
-                ctx.fillStyle = '#3498db';
-                ctx.font = '14px ' + font;
-                ctx.fillText('QUEUE', L.QUEUE_BOX_LEFT + L.QUEUE_BOX_WIDTH / 2, L.FLOOR_Y - 90);
-
-                ctx.fillStyle = '#8b4513';
-                ctx.fillRect(L.SERVER_X - 35, L.FLOOR_Y - 30, 70, 30);
-                ctx.fillStyle = '#2c3e50';
-                ctx.fillRect(L.SERVER_X - 15, L.FLOOR_Y - 45, 30, 15);
-                ctx.fillStyle = '#34495e';
-                ctx.fillRect(L.SERVER_X - 12, L.FLOOR_Y - 42, 24, 9);
-
-                ctx.save();
-                ctx.translate(L.SERVER_X, L.FLOOR_Y - 30);
-                ctx.fillStyle = '#f4c2a1';
-                ctx.beginPath();
-                ctx.arc(0, -35, 10, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#8b4513';
-                ctx.beginPath();
-                ctx.arc(0, -38, 12, Math.PI, 0);
-                ctx.fill();
-                ctx.fillStyle = '#e74c3c';
-                ctx.fillRect(-12, -25, 24, 20);
-                ctx.fillStyle = '#f4c2a1';
-                ctx.fillRect(-18, -20, 6, 15);
-                ctx.fillRect(12, -20, 6, 15);
-                ctx.beginPath();
-                ctx.arc(-15, -12, 3, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(15, -12, 3, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                drawDoor(L.ENTRANCE_X, '#10b981', 'Enter', false);
+                drawCashier();
 
                 if (sys.server && sys.server.serviceStartTime !== null) {
                     const s = sys.server;
@@ -771,22 +978,15 @@
                     const progress = span > 0
                         ? Math.min(1, Math.max(0, (simTime - s.serviceStartTime) / span))
                         : 1;
-                    const bw = 50, bh = 4;
+                    const bw = 50, bh = 5;
                     const bx = L.SERVER_X - bw / 2, by = L.FLOOR_Y - 95;
-                    ctx.fillStyle = '#bdc3c7';
-                    ctx.fillRect(bx, by, bw, bh);
-                    ctx.fillStyle = '#2ecc71';
-                    ctx.fillRect(bx, by, bw * progress, bh);
-                    ctx.strokeStyle = '#95a5a6';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(bx, by, bw, bh);
+                    ctx.fillStyle = '#e5e9f2';
+                    rrect(bx, by, bw, bh, 2.5); ctx.fill();
+                    ctx.fillStyle = '#10b981';
+                    rrect(bx, by, Math.max(bh, bw * progress), bh, 2.5); ctx.fill();
                 }
 
-                ctx.fillStyle = '#e67e22';
-                ctx.fillRect(L.EXIT_X - 20, L.FLOOR_Y - 60, 40, 60);
-                ctx.fillStyle = 'white';
-                ctx.font = '12px ' + font;
-                ctx.fillText('EXIT', L.EXIT_X, L.FLOOR_Y - 30);
+                drawDoor(L.EXIT_X, '#f59e0b', 'Exit', true);
 
                 let hidden = 0;
                 for (const c of sys.customers) {
@@ -797,8 +997,8 @@
                     drawFigure(c);
                 }
                 if (hidden > 0) {
-                    ctx.fillStyle = '#3498db';
-                    ctx.font = 'bold 14px ' + font;
+                    ctx.fillStyle = '#818cf8';
+                    ctx.font = '700 14px ' + FONT;
                     ctx.textAlign = 'left';
                     ctx.fillText('+' + hidden + ' more', L.QUEUE_BOX_LEFT + 6, L.FLOOR_Y - 30);
                 }
@@ -809,7 +1009,12 @@
 
         // ---- Charts --------------------------------------------------------
         function makeChart(id, label, color, yTitle, title, yMax) {
-            const yScale = { title: { display: true, text: yTitle }, beginAtZero: true };
+            const yScale = {
+                title: { display: true, text: yTitle, color: '#374151', font: { size: 12, weight: '500' } },
+                ticks: { color: '#4b5563', font: { size: 12 } },
+                grid: { color: 'rgba(148, 163, 184, 0.18)' },
+                beginAtZero: true
+            };
             if (yMax !== undefined) yScale.max = yMax;
             return new Chart(document.getElementById(id), {
                 type: 'line',
@@ -828,9 +1033,25 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: false,
-                    plugins: { title: { display: true, text: title } },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title,
+                            color: '#1f2937',
+                            font: { size: 14, weight: '600' }
+                        },
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: { color: '#374151', boxWidth: 12, font: { size: 12 } }
+                        }
+                    },
                     scales: {
-                        x: { title: { display: true, text: 'Time (seconds)' } },
+                        x: {
+                            title: { display: true, text: 'Time (seconds)', color: '#374151', font: { size: 12, weight: '500' } },
+                            ticks: { color: '#4b5563', font: { size: 12 } },
+                            grid: { color: 'rgba(148, 163, 184, 0.18)' }
+                        },
                         y: yScale
                     }
                 }
@@ -871,6 +1092,11 @@
             apply(waitChart, series.w);
             apply(arrivalRateChart, series.a);
             apply(utilizationChart, series.u);
+            const hasData = series.labels.length > 0;
+            ['queueChart', 'waitChart', 'arrivalRateChart', 'utilizationChart'].forEach(cid => {
+                const cc = el(cid).closest('.chart-container');
+                if (cc) cc.classList.toggle('has-data', hasData);
+            });
         }
 
         function clearCharts() {
@@ -885,6 +1111,7 @@
 
         function updateStats(simTime) {
             const st = system.stats;
+            el('elapsedTime').textContent = simTime.toFixed(1) + ' s';
             el('avgQueueLength').textContent =
                 st.elapsed > 0 ? (st.totalQueueArea / st.elapsed).toFixed(1) : '0.0';
             el('arrivalRate').textContent =
