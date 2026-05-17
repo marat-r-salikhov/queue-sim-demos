@@ -437,7 +437,7 @@
         <div class="header">
             <div class="header-text">
                 <h1>Queue Pooling Comparison</h1>
-                <p class="subtitle">Side-by-side comparison of separate vs. pooled server architectures</p>
+                <p class="subtitle">Side-by-side comparison of separate vs. pooled worker architectures</p>
             </div>
         </div>
 
@@ -458,15 +458,15 @@
                     <summary>About this simulation</summary>
                     <div class="about-body">
                         <p>This simulation shows the benefits of queue pooling by comparing two systems driven by the <strong>same</strong> stream of arrivals and service times:</p>
-                        <p><strong>Separate Servers:</strong> Each server has its own dedicated queue. Customers join the shorter queue.</p>
-                        <p><strong>Pooled Servers:</strong> All servers share a single queue. The next customer goes to any available server.</p>
+                        <p><strong>Separate Workers:</strong> Each worker has its own dedicated queue. Customers join the shorter queue.</p>
+                        <p><strong>Pooled Workers:</strong> All workers share a single queue. The next customer goes to any available worker.</p>
                     </div>
                 </details>
 
                 <div class="simulation-wrapper">
                     <div class="simulation-section">
                         <div class="simulation-title">
-                            Separate Servers System
+                            Separate Workers System
                         </div>
                         <div class="simulation-area">
                             <canvas id="separateCanvas" width="960" height="250"></canvas>
@@ -475,7 +475,7 @@
 
                     <div class="simulation-section">
                         <div class="simulation-title">
-                            Pooled Servers System
+                            Pooled Workers System
                         </div>
                         <div class="simulation-area">
                             <canvas id="pooledCanvas" width="960" height="250"></canvas>
@@ -489,8 +489,8 @@
                             <thead>
                                 <tr>
                                     <th class="col-metric">Metric</th>
-                                    <th class="col-num">Separate Servers</th>
-                                    <th class="col-num">Pooled Servers</th>
+                                    <th class="col-num">Separate Workers</th>
+                                    <th class="col-num">Pooled Workers</th>
                                     <th class="col-num">Improvement</th>
                                 </tr>
                             </thead>
@@ -914,7 +914,7 @@
                 ctx.fillStyle = '#cbd5e1';
                 ctx.font = '600 11px ' + FONT;
                 ctx.textAlign = 'center';
-                ctx.fillText('Server ' + (idx + 1), sx, sy - 6);
+                ctx.fillText('Worker ' + (idx + 1), sx, sy - 6);
             }
 
             const FONT = getComputedStyle(document.body).fontFamily;

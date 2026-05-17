@@ -437,7 +437,7 @@
         <div class="header">
             <div class="header-text">
                 <h1>Сравнение объединения очередей</h1>
-                <p class="subtitle">Параллельное сравнение раздельных и объединённых серверов</p>
+                <p class="subtitle">Параллельное сравнение раздельных и объединённых окон</p>
             </div>
         </div>
 
@@ -457,9 +457,9 @@
                 <details class="about">
                     <summary>Об этой симуляции</summary>
                     <div class="about-body">
-                        <p>Эта симуляция показывает преимущества объединения очередей: две системы получают <strong>один и тот же</strong> поток приходов и времён обслуживания.</p>
-                        <p><strong>Раздельные серверы:</strong> у каждого сервера своя отдельная очередь. Покупатели встают в более короткую из них.</p>
-                        <p><strong>Объединённые серверы:</strong> все серверы используют одну общую очередь. Следующий покупатель идёт к любому освободившемуся серверу.</p>
+                        <p>Эта симуляция показывает преимущества объединения очередей: две системы получают <strong>один и тот же</strong> поток прибытий и времён обслуживания.</p>
+                        <p><strong>Раздельные окна:</strong> у каждого окна своя отдельная очередь. Покупатели встают в более короткую из них.</p>
+                        <p><strong>Объединённые окна:</strong> все окна используют одну общую очередь. Следующий покупатель идёт к любому освободившемуся окну.</p>
                     </div>
                 </details>
 
@@ -489,8 +489,8 @@
                             <thead>
                                 <tr>
                                     <th class="col-metric">Показатель</th>
-                                    <th class="col-num">Раздельные серверы</th>
-                                    <th class="col-num">Объединённые серверы</th>
+                                    <th class="col-num">Раздельные окна</th>
+                                    <th class="col-num">Объединённые окна</th>
                                     <th class="col-num">Улучшение</th>
                                 </tr>
                             </thead>
@@ -511,7 +511,7 @@
                                     <td class="metric-name">Всего обслужено покупателей</td>
                                     <td class="metric-value" id="separateServed">0</td>
                                     <td class="metric-value" id="pooledServed">0</td>
-                                    <td class="improvement neutral" id="servedImprovement" title="Обе системы получают одинаковый поток приходов, поэтому суммарная пропускная способность равна по построению.">н/д</td>
+                                    <td class="improvement neutral" id="servedImprovement" title="Обе системы получают одинаковый поток прибытий, поэтому суммарная пропускная способность равна по построению.">н/д</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -522,15 +522,15 @@
             <div class="right-panel">
                 <div class="controls">
                     <div class="control-group">
-                        <h3>Приход покупателей</h3>
+                        <h3>Прибытие покупателей</h3>
                         <div class="control-row">
-                            <label for="arrivalMean">Среднее время между приходами (секунды)</label>
+                            <label for="arrivalMean">Среднее время между прибытиями (секунды)</label>
                             <span class="value-display" id="arrivalMeanValue">1.5 с</span>
                         </div>
                         <input type="range" id="arrivalMean" min="1" max="10" step="0.1" value="1.5">
 
                         <div class="control-row">
-                            <label for="arrivalCV">Разброс приходов (CV)</label>
+                            <label for="arrivalCV">Разброс прибытий (коэффициент вариации)</label>
                             <span class="value-display" id="arrivalCVValue">1.0</span>
                         </div>
                         <input type="range" id="arrivalCV" min="0.1" max="2" step="0.1" value="1">
@@ -545,7 +545,7 @@
                         <input type="range" id="serviceMean" min="1" max="10" step="0.1" value="1">
 
                         <div class="control-row">
-                            <label for="serviceCV">Разброс обслуживания (CV)</label>
+                            <label for="serviceCV">Разброс обслуживания (коэффициент вариации)</label>
                             <span class="value-display" id="serviceCVValue">1.0</span>
                         </div>
                         <input type="range" id="serviceCV" min="0.1" max="2" step="0.1" value="1">
@@ -914,7 +914,7 @@
                 ctx.fillStyle = '#cbd5e1';
                 ctx.font = '600 11px ' + FONT;
                 ctx.textAlign = 'center';
-                ctx.fillText('Сервер ' + (idx + 1), sx, sy - 6);
+                ctx.fillText('Окно ' + (idx + 1), sx, sy - 6);
             }
 
             const FONT = getComputedStyle(document.body).fontFamily;

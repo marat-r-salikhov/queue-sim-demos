@@ -447,15 +447,15 @@
 
                 <div class="stats">
                     <div class="stat-card c-queue">
-                        <div class="stat-label">Средняя длина очереди (<span class="var">L</span>)</div>
+                        <div class="stat-label">Средняя длина очереди</div>
                         <div class="stat-value" id="avgQueueLength">0.0</div>
                     </div>
                     <div class="stat-card c-rate">
-                        <div class="stat-label">Интенсивность прихода (<span class="var">&lambda;</span>)</div>
+                        <div class="stat-label">Интенсивность прибытий</div>
                         <div class="stat-value" id="arrivalRate">0.000 /с</div>
                     </div>
                     <div class="stat-card c-wait">
-                        <div class="stat-label">Среднее время ожидания (<span class="var">W</span>)</div>
+                        <div class="stat-label">Среднее время ожидания</div>
                         <div class="stat-value" id="avgWaitTime">0.0 с</div>
                     </div>
                     <div class="stat-card c-util">
@@ -494,15 +494,15 @@
             <div class="right-panel">
                 <div class="controls">
                     <div class="control-group">
-                        <h3>Приход покупателей</h3>
+                        <h3>Прибытие покупателей</h3>
                         <div class="control-row">
-                            <label for="arrivalMean">Среднее время между приходами (секунды)</label>
+                            <label for="arrivalMean">Среднее время между прибытиями (секунды)</label>
                             <span class="value-display" id="arrivalMeanValue">2.0 с</span>
                         </div>
                         <input type="range" id="arrivalMean" min="1" max="10" step="0.1" value="2">
 
                         <div class="control-row">
-                            <label for="arrivalCV">Разброс времени между приходами (CV)</label>
+                            <label for="arrivalCV">Разброс времени между прибытиями (коэффициент вариации)</label>
                             <span class="value-display" id="arrivalCVValue">0.1</span>
                         </div>
                         <input type="range" id="arrivalCV" min="0.1" max="2" step="0.1" value="0.1">
@@ -517,7 +517,7 @@
                         <input type="range" id="serviceMean" min="1" max="10" step="0.1" value="1.8">
 
                         <div class="control-row">
-                            <label for="serviceCV">Разброс времени обслуживания (CV)</label>
+                            <label for="serviceCV">Разброс времени обслуживания (коэффициент вариации)</label>
                             <span class="value-display" id="serviceCVValue">0.1</span>
                         </div>
                         <input type="range" id="serviceCV" min="0.1" max="2" step="0.1" value="0.1">
@@ -1040,8 +1040,8 @@
             'Число покупателей', 'Длина очереди по ходу симуляции');
         const waitChart = makeChart('waitChart', 'Среднее время ожидания', 'rgb(231, 76, 60)',
             'Время ожидания (секунды)', 'Среднее время ожидания по ходу симуляции');
-        const arrivalRateChart = makeChart('arrivalRateChart', 'Интенсивность прихода', 'rgb(243, 156, 18)',
-            'Приходов в секунду', 'Интенсивность прихода покупателей по ходу симуляции');
+        const arrivalRateChart = makeChart('arrivalRateChart', 'Интенсивность прибытий', 'rgb(243, 156, 18)',
+            'Прибытий в секунду', 'Интенсивность прибытий покупателей по ходу симуляции');
         const utilizationChart = makeChart('utilizationChart', 'Загрузка кассы', 'rgb(155, 89, 182)',
             'Загрузка (%)', 'Загрузка кассы по ходу симуляции', 100);
 
