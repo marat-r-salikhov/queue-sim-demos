@@ -716,7 +716,8 @@
             }
 
             // 2. Complete service
-            if (sys.server && simTime >= sys.server.serviceEndTime) {
+            if (sys.server && sys.server.serviceEndTime !== null &&
+                simTime >= sys.server.serviceEndTime) {
                 const c = sys.server;
                 c.departureTime = c.serviceEndTime;
                 c.setState('leaving');
@@ -725,16 +726,22 @@
                 sys.server = null;
             }
 
-            // 3. Dispatch a waiting customer to the free server
+            // 3. Dispatch a waiting customer to the free server (they walk up)
             if (!sys.server && sys.queue.length > 0) {
                 const c = sys.queue.shift();
                 sys.server = c;
+                c.setState('in_service');
+                sys.queue.forEach((q, i) => { q.queuePos = i; });
+            }
+
+            // 3b. Start service once the customer reaches the counter
+            if (sys.server && sys.server.serviceStartTime === null &&
+                sys.server.x >= L.SERVER_X - 0.5) {
+                const c = sys.server;
                 c.serviceStartTime = simTime;
                 c.serviceEndTime = simTime + c.serviceDuration;
-                c.setState('in_service');
                 sys.stats.totalWaitTime += c.serviceStartTime - c.arrivalTime;
                 sys.stats.waitCount++;
-                sys.queue.forEach((q, i) => { q.queuePos = i; });
             }
 
             // 4. Time-weighted statistics (logical queue only)

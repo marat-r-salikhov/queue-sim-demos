@@ -766,7 +766,7 @@
             // 2. Complete finished services
             for (let i = 0; i < 2; i++) {
                 const c = sys.servers[i];
-                if (c && simTime >= c.serviceEndTime) {
+                if (c && c.serviceEndTime !== null && simTime >= c.serviceEndTime) {
                     c.departureTime = c.serviceEndTime;
                     c.setState('leaving');
                     sys.stats.customersServed++;
@@ -774,7 +774,7 @@
                 }
             }
 
-            // 3. Dispatch waiting customers to free servers
+            // 3. Dispatch waiting customers to free servers (they walk up)
             for (let i = 0; i < 2; i++) {
                 if (sys.servers[i] !== null) continue;
                 const q = sys.type === 'separate' ? sys.queues[i] : sys.queues[0];
@@ -782,14 +782,23 @@
                 const c = q.shift();
                 sys.servers[i] = c;
                 c.serverIdx = i;
-                c.serviceStartTime = simTime;
-                c.serviceEndTime = simTime + c.serviceDuration;
                 c.exitY = (sys.type === 'separate' && i === 0)
                     ? L.FLOOR_Y - L.QUEUE_Y_OFFSET : L.FLOOR_Y;
                 c.setState('in_service');
-                sys.stats.totalWaitTime += c.serviceStartTime - c.arrivalTime;
-                sys.stats.waitCount++;
                 q.forEach((qc, idx) => { qc.queuePos = idx; });
+            }
+
+            // 3b. Start service once a dispatched customer reaches its server
+            for (let i = 0; i < 2; i++) {
+                const c = sys.servers[i];
+                if (!c || c.serviceStartTime !== null) continue;
+                const tg = target(sys, c);
+                if (Math.abs(c.x - tg.x) < 1 && Math.abs(c.y - tg.y) < 1) {
+                    c.serviceStartTime = simTime;
+                    c.serviceEndTime = simTime + c.serviceDuration;
+                    sys.stats.totalWaitTime += c.serviceStartTime - c.arrivalTime;
+                    sys.stats.waitCount++;
+                }
             }
 
             // 4. Time-weighted queue length (waiting only)
