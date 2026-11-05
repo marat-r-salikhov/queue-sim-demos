@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Emergency room · Little's law</title>
+<style>
+:root{--bg:#f0f3f9;--surface:#fff;--soft:#f7f9fd;--ink:#19243b;--muted:#69778b;--faint:#9aa6b6;--border:#e2e8f1;--blue:#4f58c9;--teal:#129b8a;--gold:#d28a3e;--shadow:0 6px 28px rgba(25,42,76,.045)}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);padding:25px 18px 40px;-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}main{max-width:1240px;margin:auto;padding:28px 30px 32px;border:1px solid var(--border);background:var(--surface);border-radius:18px;box-shadow:var(--shadow)}h1{margin:0 0 25px;font-weight:700;font-size:27px;letter-spacing:-.8px}h2{font-size:15px;letter-spacing:-.12px;margin:0;font-weight:680}p{margin:0}.layout{display:grid;grid-template-columns:minmax(0,1fr) 298px;gap:22px;align-items:start}.left{min-width:0;display:flex;flex-direction:column;gap:17px}.right{display:flex;flex-direction:column;gap:15px;min-width:0}.panel{border:1px solid var(--border);background:var(--surface);border-radius:12px;overflow:hidden}.panel.pad{padding:17px 18px}.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.light{color:var(--muted);font-size:12px}.figures{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.figure{background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:15px 16px;min-width:0}.figure .symbol{font-size:15px;font-weight:650;color:var(--blue);font-style:italic}.figure .number{font-size:29px;font-weight:730;letter-spacing:-1.1px;line-height:1.32;white-space:nowrap;font-variant-numeric:tabular-nums}.figure .unit{color:var(--muted);font-size:12px}.figure .observed{color:var(--teal);font-size:12px;min-height:17px;margin-top:6px;font-variant-numeric:tabular-nums}.flow{display:grid;grid-template-columns:1.16fr .85fr 1.16fr .98fr;gap:8px;min-width:0}.station{background:var(--soft);border:1px solid var(--border);border-radius:10px;min-width:0;padding:10px 10px 11px;height:171px;display:flex;flex-direction:column;position:relative}.station:not(:last-child):after{content:'›';position:absolute;z-index:2;right:-10px;top:67px;color:#97a4b4;font-size:21px;background:var(--surface);width:17px;text-align:center;border-radius:50%}.station-name{font-size:11.5px;font-weight:600;color:#647187;line-height:1.24;min-height:27px}.station .station-quantity{font-size:26px;font-weight:710;line-height:1.35;letter-spacing:-.5px;font-variant-numeric:tabular-nums}.dots{display:flex;align-content:flex-start;align-items:flex-start;gap:5px;flex-wrap:wrap;margin-top:7px;overflow:hidden;flex:1;position:relative}.dot{flex:none;height:8px;width:8px;background:#7889d5;border-radius:50%;opacity:.78;animation:pop .18s ease both}.dot.doc{background:var(--teal)}.dot.admit{background:var(--gold)}.overflow-note{font-size:11px;color:var(--muted);align-self:end;margin-left:2px}@keyframes pop{from{transform:scale(.4);opacity:.2}to{transform:scale(1);opacity:.8}}.flow-footer{margin-top:11px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}.flow-footer strong{font-size:13px;color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}.chart{display:block;width:100%;height:210px}.legend{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}.legend span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.linekey{display:inline-block;width:16px;height:3px;border-radius:2px;background:var(--blue)}.linekey.teal{background:var(--teal)}.linekey.expected{height:0;border-top:2px dashed #a9b3c2;background:transparent;border-radius:0}.chart-empty{display:none}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}th{font-size:11px;font-weight:610;letter-spacing:.04px;color:var(--muted);text-align:right;background:var(--soft);border-bottom:1px solid var(--border);padding:11px 15px;white-space:nowrap}th:first-child{text-align:left;min-width:160px}td{padding:10px 15px;border-bottom:1px solid #edf0f5;text-align:right;white-space:nowrap}td:first-child{text-align:left;white-space:normal}tr:last-child td{border-bottom:0}tr.total-row{background:#f7f9ff;font-weight:680}td.sim-value{color:var(--teal);font-weight:630}.sformula{font-weight:570;color:var(--blue)}.side-title{font-size:15px;font-weight:680;margin-bottom:14px}.time-line{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:9px}.time-main{font-weight:700;font-size:18px;letter-spacing:-.25px;font-variant-numeric:tabular-nums}.progress{height:6px;border-radius:8px;background:#e9edf6;overflow:hidden;margin-bottom:15px}.progress>div{width:0%;height:100%;background:var(--blue);border-radius:8px;transition:width .08s}.buttons{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--blue);background:var(--blue);color:white;border-radius:8px;padding:10px 15px;font-weight:620;min-width:0;box-shadow:0 1px 3px rgba(56,61,137,.11)}.btn:hover:not(:disabled){background:#4149af}.btn.secondary{background:#fff;border-color:#d5ddeb;color:var(--ink);box-shadow:none}.btn.secondary:hover:not(:disabled){background:#f6f8fb}.btn.start{flex:1}.button-small{font-size:13px}.full{width:100%}.inputs{display:grid;grid-template-columns:1fr 1fr;gap:13px 12px}.field{min-width:0}.field label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:5px;line-height:1.35}.field input,.field select{width:100%;height:36px;padding:6px 9px;border:1px solid #d5ddeb;border-radius:7px;background:#fff;color:var(--ink);outline:0;font-variant-numeric:tabular-nums;min-width:0}.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(79,88,201,.12)}.field.span2{grid-column:span 2}.field.inline{display:flex;align-items:center;justify-content:space-between;gap:9px}.field.inline label{margin:0}.field.inline select{width:136px}.formula-preview{padding-top:13px;margin-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}.formula-preview strong{font-weight:650;color:var(--ink)}.downloads .btn{font-size:13px}.downloads details{margin-top:12px}.downloads summary{font-size:12px;color:var(--muted);cursor:pointer;user-select:none}.downloads p{font-size:12px;color:var(--muted);line-height:1.65;margin-top:9px}#errorBox{display:none;border-radius:8px;padding:9px;margin-top:12px;color:#8f3c31;background:#fff2ef;font-size:12px}.footnote{font-size:11.5px;color:var(--faint)}@media(max-width:980px){.layout{grid-template-columns:1fr}.right{display:grid;grid-template-columns:1fr 1fr;gap:14px}.downloads{grid-column:1/-1}.inputs{gap:10px 12px}}@media(max-width:650px){body{padding:10px}main{padding:19px 14px 20px;border-radius:12px}h1{font-size:23px;margin-bottom:17px}.left{gap:12px}.right{display:flex}.figures{gap:6px}.figure{padding:10px}.figure .number{font-size:24px}.figure .unit,.figure .observed{font-size:10px}.panel.pad{padding:13px}.flow{grid-template-columns:1fr 1fr;gap:8px}.station{height:145px}.station:after{display:none}.dots{gap:4px}.dot{height:7px;width:7px}.panel-heading{align-items:flex-start;flex-wrap:wrap}.chart{height:190px}th,td{padding:9px 10px}}
+
+/* Compact endogenous-queue controls and live metrics */
+.figure .number{color:var(--ink)}
+.figure .observed{margin-top:6px}
+.reference{color:var(--muted);font-size:10.5px;display:block;font-weight:450;margin-top:1px}
+.stats-table th,.stats-table td{white-space:nowrap}
+.stats-table th:first-child{min-width:164px}
+.stats-table td:first-child{min-width:164px;white-space:normal}
+.stats-table td.sim-value{color:var(--ink)}
+.stats-table td.law-value{color:var(--teal);font-weight:650}
+.panel-title-inline{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.small-rule{font-size:11.5px;color:var(--muted);line-height:1.5;padding-top:12px;border-top:1px solid var(--border);margin-top:12px}
+.small-rule strong{color:var(--ink)}
+.field.spaced{padding-top:8px}
+@media(max-width:650px){.stats-table th,.stats-table td{padding:8px 9px}.stats-table th:first-child,.stats-table td:first-child{min-width:150px}}
+</style></head>
+<body>
+<main>
+<h1>Emergency room</h1>
+<div class="layout">
+  <div class="left">
+    <section class="figures" aria-label="Live Little's law measurements">
+      <div class="figure"><div class="symbol">λ</div><div class="number" id="liveRate">—</div><div class="unit">patients / hour</div><div class="observed">Problem: 50</div></div>
+      <div class="figure"><div class="symbol">L</div><div class="number" id="liveL">—</div><div class="unit">patients in ER (average)</div><div class="observed">Problem: 77.92</div></div>
+      <div class="figure"><div class="symbol">W</div><div class="number" id="liveW">—</div><div class="unit">minutes in ER</div><div class="observed">Problem: 93.5</div></div>
+    </section>
+    <section class="panel pad">
+      <div class="panel-heading"><h2>Patient flow</h2><span class="light" id="flowStatus">0.0 h</span></div>
+      <div class="flow" aria-label="Current patients by stage">
+        <div class="station"><div class="station-name">Registration queue</div><div class="station-quantity" id="count0">0</div><div class="dots" id="dots0"></div></div>
+        <div class="station"><div class="station-name">Registering</div><div class="station-quantity" id="count1">0</div><div class="dots" id="dots1"></div></div>
+        <div class="station"><div class="station-name">Doctor queue</div><div class="station-quantity" id="count2">0</div><div class="dots" id="dots2"></div></div>
+        <div class="station"><div class="station-name">With doctor</div><div class="station-quantity" id="count3">0</div><div class="dots" id="dots3"></div></div>
+      </div>
+      <div class="flow-footer"><span><span style="display:inline-block;width:8px;height:8px;background:var(--gold);border-radius:50%;margin-right:4px"></span>Admitted · <span id="admitCurrent">0</span> with doctor</span><span>Exited <strong id="exitedCount">0</strong></span></div>
+    </section>
+    <section class="panel pad">
+      <div class="panel-heading"><h2>Little’s law: L = λW</h2><div class="legend"><span><i class="linekey"></i>L</span><span><i class="linekey teal"></i>λW</span><span><i class="linekey expected"></i>Problem</span></div></div>
+      <canvas class="chart" id="lawChart" role="img" aria-label="Running mean ER occupancy and throughput times mean ER stay"></canvas>
+    </section>
+    <section class="panel">
+      <div class="table-wrap">
+        <table class="stats-table"><thead><tr><th>Stage</th><th>L</th><th>λ /h</th><th>W (min)</th><th>λW</th></tr></thead><tbody id="stageTable"></tbody></table>
+      </div>
+    </section>
+  </div>
+  <aside class="right">
+    <section class="panel pad">
+      <div class="time-line"><h2>Simulation</h2><div class="time-main" id="timeLabel">0 / 365 days</div></div>
+      <div class="progress"><div id="progressFill"></div></div>
+      <div class="buttons"><button class="btn start" id="startBtn">Start</button><button class="btn secondary button-small" id="finishBtn">Finish</button><button class="btn secondary button-small" id="resetBtn">Reset</button></div>
+      <div class="inputs" style="margin-top:15px">
+        <div class="field inline span2"><label for="speed">Speed</label><select id="speed"><option value="15">15 min/s</option><option value="60">1 h/s</option><option value="360">6 h/s</option><option value="1440" selected>1 day/s</option><option value="10080">7 days/s</option></select></div>
+        <div class="field inline span2"><label for="duration">Duration</label><select id="duration"><option value="168">7 days</option><option value="720">30 days</option><option value="2160">90 days</option><option value="4320">180 days</option><option value="8760" selected>365 days</option></select></div>
+      </div>
+    </section>
+    <section class="panel pad">
+      <h2 class="side-title">Parameters</h2>
+      <div class="inputs">
+        <div class="field span2"><label for="arrivalRate">Arrivals / hour</label><input id="arrivalRate" type="number" min="1" max="150" step="1" value="50"></div>
+        <div class="field"><label for="registrars">Registration clerks</label><input id="registrars" type="number" min="1" max="20" step="1" value="2"></div>
+        <div class="field"><label for="doctors">Doctors</label><input id="doctors" type="number" min="1" max="30" step="1" value="7"></div>
+        <div class="field"><label for="regMin">Registration (min)</label><input id="regMin" type="number" min="0.1" max="60" step="0.1" value="2"></div>
+        <div class="field"><label for="rxMin">Prescription (min)</label><input id="rxMin" type="number" min="0.1" max="120" step="0.5" value="5"></div>
+        <div class="field"><label for="admitMin">Admission (min)</label><input id="admitMin" type="number" min="0.1" max="240" step="0.5" value="30"></div>
+        <div class="field"><label for="admitPct">Admitted (%)</label><input id="admitPct" type="number" min="0" max="100" step="1" value="10"></div>
+        <div class="field"><label for="arrivalCV" title="Interarrival-time standard deviation divided by its mean">Arrival CV</label><input id="arrivalCV" type="number" min="0" max="5" step="0.1" value="2.5"></div>
+        <div class="field"><label for="regCV" title="Registration-service-time standard deviation divided by its mean">Registration CV</label><input id="regCV" type="number" min="0" max="5" step="0.1" value="2.9"></div>
+        <div class="field span2"><label for="docCV" title="Service-time coefficient of variation conditional on prescription or admission">Doctor CV (within type)</label><input id="docCV" type="number" min="0" max="5" step="0.01" value="1.56"></div>
+        <div class="field span2"><label for="seed">Random seed</label><input id="seed" type="number" min="1" max="4294967295" step="1" value="12345"></div>
+      </div>
+      <div class="small-rule" id="capacityText"></div>
+    </section>
+    <section class="panel pad notes">
+      <details><summary>Model assumptions</summary><p>Arrivals and service durations follow gamma distributions with the stated means. CV = standard deviation / mean; higher CV creates more uneven arrivals or longer service-time tails. The doctor CV applies within each patient type; mixing 5-minute prescriptions and 30-minute admissions adds further variability. Two clerks and seven doctors serve patients in FIFO order, starting the next patient immediately upon becoming free. The simulation uses a 30-day warm-up. The default CVs were calibrated across 12 year-long runs to produce waiting queues near 30 and 40; the exercise does not determine these CVs uniquely. Queue lengths and waits are never imposed.</p></details>
+      <div id="errorBox" role="alert"></div>
+    </section>
+  </aside>
+</div>
+</main>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const STAGES = ['Registration queue','Registering','Doctor queue','With doctor'];
+const PROB_L = [30,50*2/60,40,50*7.5/60], PROB_W = [36,2,48,7.5];
+const PIDS = ['arrivalRate','registrars','doctors','regMin','rxMin','admitMin','admitPct','arrivalCV','regCV','docCV','seed'];
+const WARMUP_MIN = 30*24*60;
+let state=null, raf=null, lastFrame=0, running=false, priorSig=['','','',''];
+const clamp=(v,lo,hi,fallback)=>{const x=Number(v);return Number.isFinite(x)?Math.max(lo,Math.min(hi,x)):fallback;};
+const fmt=(n,d=1)=>Number.isFinite(n)?n.toFixed(d):'—';
+function config(){return {
+  rate:clamp($('arrivalRate').value,1,150,50),registrars:Math.floor(clamp($('registrars').value,1,20,2)),
+  doctors:Math.floor(clamp($('doctors').value,1,30,7)),regMin:clamp($('regMin').value,.1,60,2),
+  rxMin:clamp($('rxMin').value,.1,120,5),admitMin:clamp($('admitMin').value,.1,240,30),
+  admitPct:clamp($('admitPct').value,0,100,10)/100,
+  arrivalCV:clamp($('arrivalCV').value,0,5,2.5),regCV:clamp($('regCV').value,0,5,2.9),
+  docCV:clamp($('docCV').value,0,5,1.56),seed:Math.floor(clamp($('seed').value,1,4294967295,12345)),
+  duration:60*Number($('duration').value)
+};}
+function utilization(c){const docMean=(1-c.admitPct)*c.rxMin+c.admitPct*c.admitMin;
+  return {reg:c.rate*c.regMin/(60*c.registrars),doc:c.rate*docMean/(60*c.doctors)};}
+function makeRng(seed){let s=seed>>>0;return()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return(s+.5)/4294967296;};}
+function normal(rng){const a=Math.max(1e-12,rng()),b=rng();return Math.sqrt(-2*Math.log(a))*Math.cos(2*Math.PI*b);}
+function gamma(k,rng){if(k<1)return gamma(k+1,rng)*Math.pow(Math.max(1e-12,rng()),1/k);
+ const d=k-1/3,c=1/Math.sqrt(9*d);for(;;){const z=normal(rng),v=1+c*z;if(v<=0)continue;
+ const x=v*v*v,u=Math.max(1e-12,rng());if(u<1-.0331*z*z*z*z||Math.log(u)<.5*z*z+d*(1-x+Math.log(x)))return d*x;}}
+function duration(mean,cv,rng){if(cv===0)return mean;if(cv===1)return -mean*Math.log(Math.max(1e-12,rng()));return mean*cv*cv*gamma(1/(cv*cv),rng);}
+// Chronological event heap; only pending events and active patients are retained.
+function push(s,t,type,p=null){const e={t,type,p,serial:s.serial++},a=s.heap;a.push(e);
+ let i=a.length-1;while(i){const j=(i-1)>>1;if(a[j].t<e.t||(a[j].t===e.t&&a[j].serial<=e.serial))break;a[i]=a[j];i=j;}a[i]=e;}
+function pop(s){const a=s.heap,first=a[0],last=a.pop();if(a.length){let i=0;for(;;){let j=2*i+1;if(j>=a.length)break;
+ if(j+1<a.length&&(a[j+1].t<a[j].t||(a[j+1].t===a[j].t&&a[j+1].serial<a[j].serial)))j++;
+ if(a[j].t>last.t||(a[j].t===last.t&&a[j].serial>=last.serial))break;a[i]=a[j];i=j;}a[i]=last;}return first;}
+function transition(s,p,to){if(p.stage>=0){s.counts[p.stage]--;s.stageSets[p.stage].delete(p);}
+ if(to>=0){s.counts[to]++;s.stageSets[to].add(p);}p.stage=to;}
+function record(s,stage,wait,time){if(time>=0){s.completed[stage]++;s.sumW[stage]+=wait;}}
+function dispatchReg(s,t){while(s.freeReg>0&&s.regQueue.length){const p=s.regQueue.shift();s.freeReg--;
+ transition(s,p,1);p.regStart=t;record(s,0,t-p.arrival,t);
+ push(s,t+p.regDur,'regFinish',p);}}
+function dispatchDoc(s,t){while(s.freeDoc>0&&s.docQueue.length){const p=s.docQueue.shift();s.freeDoc--;
+ transition(s,p,3);p.docStart=t;record(s,2,t-p.regEnd,t);
+ push(s,t+p.docDur,'docFinish',p);}}
+function event(s,e){const t=e.t,p=e.p,c=s.c;
+ switch(e.type){
+  case 'arrival':{
+   s.generated++;if(s.generated>1800000)throw Error('Too many arrivals; shorten the horizon or lower the arrival rate.');
+   const admitted=s.rng()<c.admitPct;
+   const person={arrival:t,admitted,regDur:duration(c.regMin,c.regCV,s.rng),
+     docDur:duration(admitted?c.admitMin:c.rxMin,c.docCV,s.rng),stage:-1,regStart:NaN,regEnd:NaN,docStart:NaN};
+   transition(s,person,0);s.regQueue.push(person);if(t>=0)s.arrivals++;
+   const next=t+duration(60/c.rate,c.arrivalCV,s.rng);
+   if(next<=s.maxTime+20)push(s,next,'arrival');
+   dispatchReg(s,t);break;}
+  case 'regFinish':
+   p.regEnd=t;transition(s,p,2);record(s,1,p.regDur,t);s.docQueue.push(p);
+   s.freeReg++;dispatchReg(s,t);dispatchDoc(s,t);break;
+  case 'docFinish':
+   transition(s,p,-1);record(s,3,p.docDur,t);
+   if(t>=0){s.exits++;s.sumTotalW+=t-p.arrival;}
+   s.freeDoc++;dispatchDoc(s,t);break;
+ }
+}
+function move(s,t){if(t>s.time){const dt=t-Math.max(0,s.time);if(dt>0){for(let i=0;i<4;i++)s.areas[i]+=s.counts[i]*dt;}s.time=t;}}
+function advanceTo(s,limit){const target=Math.max(s.time,Math.min(limit,s.maxTime));
+ let count=0;
+ while(s.heap.length&&s.heap[0].t<=target){const e=pop(s);move(s,e.t);event(s,e);
+  if(++count>8000000)throw Error('Event limit reached. Reduce the experiment horizon.');
+  if(s.time>=s.nextSample-1e-9){sample(s);s.nextSample+=s.sampleInterval;}}
+ move(s,target);
+ while(s.nextSample<=s.time+1e-9){sample(s);s.nextSample+=s.sampleInterval;}
+ if(target>=s.maxTime-1e-8){s.done=true;sample(s);}}
+function createSimulation(c){const sampleInterval=c.duration>=90*1440?360:c.duration>=30*1440?120:15;
+ const s={c,heap:[],serial:0,generated:0,time:-WARMUP_MIN,maxTime:c.duration,done:false,rng:makeRng(c.seed),
+  regQueue:[],docQueue:[],freeReg:c.registrars,freeDoc:c.doctors,
+  stageSets:[new Set(),new Set(),new Set(),new Set()],counts:[0,0,0,0],
+  areas:[0,0,0,0],arrivals:0,exits:0,completed:[0,0,0,0],sumW:[0,0,0,0],sumTotalW:0,
+  samples:[],sampleInterval,nextSample:sampleInterval};
+ push(s,s.time+duration(60/c.rate,c.arrivalCV,s.rng),'arrival');
+ advanceTo(s,0);s.time=0;
+ return s;}
+function observed(s){if(s.time<=0)return null;
+ const L=s.areas.map(a=>a/s.time),rate=s.completed.map(n=>60*n/s.time);
+ const W=s.completed.map((n,i)=>n?s.sumW[i]/n:null);
+ const law=W.map((w,i)=>w===null?null:rate[i]*w/60);
+ return {L,rate,W,law,totalL:L.reduce((a,b)=>a+b,0),
+  totalRate:60*s.exits/s.time,totalW:s.exits?s.sumTotalW/s.exits:null,
+  totalLaw:s.exits?s.sumTotalW/s.time:null};}
+function sample(s){if(s.time<=0)return;const o=observed(s);
+ const pt={t:s.time,L:o.totalL,law:s.exits>20?o.totalLaw:null};
+ if(s.samples.length&&Math.abs(s.samples[s.samples.length-1].t-s.time)<1e-7)s.samples[s.samples.length-1]=pt;
+ else s.samples.push(pt);}
+function drawDots(){for(let i=0;i<4;i++){
+ const active=state.stageSets[i],count=active.size,shown=[];
+ $('count'+i).textContent=count;
+ for(const p of active){if(shown.length>=70)break;shown.push(p);}
+ const sig=count+'-'+(i===3?shown.filter(p=>p.admitted).length:0);
+ if(sig!==priorSig[i]){$('dots'+i).innerHTML=shown.map(p=>'<span class="dot'+(i===3&&p.admitted?' admit':'')+'"></span>').join('')+
+ (count>shown.length?'<span class="overflow-note">+'+(count-shown.length)+'</span>':'');priorSig[i]=sig;}}
+ let admitted=0;for(const p of state.stageSets[3])if(p.admitted)admitted++;
+ $('admitCurrent').textContent=admitted;$('exitedCount').textContent=state.exits.toLocaleString();
+ $('flowStatus').textContent=fmt(state.time/1440,1)+' days';}
+function drawTable(){const o=observed(state),names=STAGES.concat('Entire ER');
+ $('stageTable').innerHTML=names.map((name,i)=>{
+  const total=i===4,L=o?(total?o.totalL:o.L[i]):null,rate=o?(total?o.totalRate:o.rate[i]):null,
+   W=o?(total?o.totalW:o.W[i]):null,law=o?(total?o.totalLaw:o.law[i]):null,
+   refL=total?77.91666666666667:PROB_L[i],refW=total?93.5:PROB_W[i];
+  return '<tr'+(total?' class="total-row"':'')+'><td>'+name+
+   '<span class="reference">Target: '+fmt(refL,2)+' patients · '+fmt(refW,1)+' min</span></td>'+
+   '<td class="sim-value">'+fmt(L,2)+'</td><td>'+fmt(rate,1)+'</td><td>'+fmt(W,1)+
+   '</td><td class="law-value">'+fmt(law,2)+'</td></tr>';
+ }).join('');}
+function drawChart(){if(!state)return;const canvas=$('lawChart'),r=canvas.getBoundingClientRect(),w=r.width||600,h=r.height||210,
+ dpr=Math.min(2,window.devicePixelRatio||1),tw=Math.round(w*dpr),th=Math.round(h*dpr);
+ if(canvas.width!==tw||canvas.height!==th){canvas.width=tw;canvas.height=th;}
+ const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+ const s=state,pad={left:39,right:12,top:11,bottom:25},pw=w-pad.left-pad.right,ph=h-pad.top-pad.bottom;
+ if(pw<10||ph<10)return;
+ const pts=s.samples.slice();if(s.time>0&&(pts.length===0||pts[pts.length-1].t<s.time-.01)){
+  const o=observed(s);pts.push({t:s.time,L:o.totalL,law:s.exits>20?o.totalLaw:null});}
+ const high=Math.ceil(Math.max(100,...pts.flatMap(p=>[p.L,p.law]).filter(Number.isFinite).map(x=>x*1.08))/10)*10;
+ const px=t=>pad.left+Math.max(0,Math.min(1,t/s.maxTime))*pw,py=v=>pad.top+ph-v/high*ph;
+ ctx.font='11px system-ui,sans-serif';ctx.textBaseline='middle';
+ for(let i=0;i<=4;i++){const y=py(high*i/4);ctx.setLineDash([]);ctx.lineWidth=1;ctx.strokeStyle='#e9edf4';
+  ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(w-pad.right,y);ctx.stroke();
+  ctx.fillStyle='#8693a5';ctx.textAlign='right';ctx.fillText(fmt(high*i/4,0),pad.left-6,y);
+  const t=s.maxTime*i/4;ctx.textAlign=i===0?'left':i===4?'right':'center';
+  const label=s.maxTime>=72*60?fmt(t/1440,0)+'d':fmt(t/60,0)+'h';ctx.fillText(label,px(t),h-8);}
+ ctx.save();ctx.setLineDash([5,5]);ctx.strokeStyle='#a5b0c0';ctx.lineWidth=1.5;
+ ctx.beginPath();ctx.moveTo(px(0),py(77.916666667));ctx.lineTo(px(s.maxTime),py(77.916666667));ctx.stroke();ctx.restore();
+ for(const [key,color] of [['L','#4f58c9'],['law','#129b8a']]){
+  ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=2.4;ctx.lineJoin='round';
+  let first=true;for(const p of pts){if(!Number.isFinite(p[key])){first=true;continue;}
+   if(first){ctx.moveTo(px(p.t),py(p[key]));first=false;}else ctx.lineTo(px(p.t),py(p[key]));}ctx.stroke();}}
+function render(){if(!state)return;const o=observed(state),u=utilization(state.c);
+ $('liveRate').textContent=o?fmt(o.totalRate,1):'—';
+ $('liveL').textContent=o?fmt(o.totalL,2):'—';$('liveW').textContent=o?fmt(o.totalW,1):'—';
+ $('timeLabel').textContent=fmt(state.time/1440,1)+' / '+fmt(state.maxTime/1440,0)+' days';
+ $('progressFill').style.width=100*state.time/state.maxTime+'%';
+ $('startBtn').textContent=state.done?'Completed':running?'Pause':state.time>0?'Resume':'Start';
+ $('startBtn').disabled=state.done;$('finishBtn').disabled=state.done;
+ const overload=u.reg>=1||u.doc>=1;
+ $('capacityText').innerHTML='<strong>Worker utilization</strong> · registration '+fmt(u.reg*100,1)+'% · doctors '+fmt(u.doc*100,1)+'%'+
+ (overload?'<div style="color:#a85835;margin-top:5px">At least one queue is unstable at this arrival rate.</div>':'');
+ drawDots();drawTable();drawChart();}
+function pause(){running=false;if(raf!==null){cancelAnimationFrame(raf);raf=null;}if(state)render();}
+function frame(now){if(!running)return;const dt=Math.min(.15,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
+ try{advanceTo(state,state.time+dt*Number($('speed').value));}catch(e){pause();showError(e);return;}
+ render();if(state.done){pause();return;}raf=requestAnimationFrame(frame);}
+function start(){if(running||state.done)return;running=true;lastFrame=performance.now();render();raf=requestAnimationFrame(frame);}
+function toggle(){running?pause():start();}
+function finish(){pause();try{advanceTo(state,state.maxTime);}catch(e){showError(e);}render();}
+function showError(e){$('errorBox').style.display='block';$('errorBox').textContent=String(e&&e.message||e);}
+function reset(){pause();$('errorBox').style.display='none';try{state=createSimulation(config());priorSig=['','','',''];render();}catch(e){showError(e);}}
+$('startBtn').addEventListener('click',toggle);$('finishBtn').addEventListener('click',finish);$('resetBtn').addEventListener('click',reset);
+$('duration').addEventListener('change',reset);for(const id of PIDS)$(id).addEventListener('change',reset);
+window.addEventListener('resize',drawChart);document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)pause();});
+reset();window.__ersim={getState:()=>state,observed:()=>observed(state),advanceTo:t=>{advanceTo(state,t);render();}};
+})();
+</script>
+</body></html>
