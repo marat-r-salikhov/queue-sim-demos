@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buffers, blocking, and throughput</title>
+<style>
+  :root{
+    color-scheme:light;
+    --bg:#f3f5f9;--paper:#fff;--ink:#202b3b;--muted:#64748b;--subtle:#94a3b8;
+    --border:#e3e8f0;--blue:#436bd0;--teal:#168d83;--slate:#78859a;
+    --amber:#d18b34;--shadow:0 10px 35px rgba(26,42,79,.045);
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14px}
+  button,input,select{font:inherit}
+  button{cursor:pointer;transition:background .13s,border-color .13s;white-space:nowrap}
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #acc3ff;outline-offset:2px}
+  .wrap{max-width:1370px;margin:0 auto;padding:28px 30px 35px}
+  .head{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:23px;flex-wrap:wrap}
+  h1{margin:0;font-size:25px;font-weight:720;letter-spacing:-.033em}
+  .actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+  .clock{font-variant-numeric:tabular-nums;font-weight:650;font-size:13px;color:#415065;min-width:104px;text-align:right;margin-right:8px}
+  .btn{border:1px solid var(--border);padding:10px 15px;border-radius:9px;background:#fff;color:#3b475a;font-weight:640;line-height:1.2}
+  .btn:hover{background:#f5f7fa;border-color:#cad4e5}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;min-width:91px}
+  .btn.primary:hover{background:#3159bc}
+  .btn:disabled{opacity:.5;cursor:default}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;align-items:start}
+  .main{min-width:0;display:flex;flex-direction:column;gap:13px}
+  .panel{background:var(--paper);border:1px solid var(--border);border-radius:13px;box-shadow:var(--shadow)}
+  .lane{padding:14px 19px 12px;overflow:hidden}
+  .lanehead{display:flex;justify-content:space-between;align-items:baseline;gap:15px;min-height:30px}
+  .lanehead h2{font-size:15px;line-height:1.3;font-weight:680;margin:0}
+  .value{font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:5px}
+  .value b{font-size:23px;font-weight:730;letter-spacing:-.04em}
+  .value span{font-size:12px;color:var(--muted)}
+  svg.flow{display:block;width:100%;height:auto;max-height:154px;overflow:visible}
+  .slabel{font-size:14px;fill:#63748d;font-weight:600}
+  .station-text{font-size:14px;fill:#344259;font-weight:650}
+  .station-small{font-size:12px;fill:#7a889d}
+  .machine-box{fill:#fff;stroke:#b7c7dc;stroke-width:2;transition:stroke .15s,fill .15s}
+  .machine-box.processing{stroke:#5a83da;fill:#f4f7ff}
+  .machine-box.blocked{stroke:#d69c50;fill:#fff8ec}
+  .machine-box.idle{stroke:#cbd5e2;fill:#fcfdff}
+  .transfer{stroke:#89a1cb;stroke-width:2.5;fill:none;stroke-linecap:round}
+  .buffer-shape{fill:#fafbfe;stroke:#96aed4;stroke-width:2.4;stroke-linejoin:round}
+  .buffer-count{font-size:19px;font-weight:720;fill:#405a88;text-anchor:middle}
+  .bar-bg{fill:#e4eaf3}.bar-fg{fill:#4a73d3}
+  .rowstats{display:flex;align-items:center;justify-content:space-between;gap:9px 16px;flex-wrap:wrap;color:#667489;border-top:1px solid #eef1f6;padding:12px 4px 1px;font-size:12px;font-variant-numeric:tabular-nums}
+  .rowstats strong{font-weight:680;color:#344258}
+  .controls{padding:20px 18px 16px;display:flex;flex-direction:column;gap:19px;position:sticky;top:18px}
+  .control{display:flex;flex-direction:column;gap:8px}
+  .control-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:13px;color:#45546a;font-weight:640}
+  .control-title output{font-variant-numeric:tabular-nums;color:#334f9c}
+  input[type=range]{width:100%;margin:5px 0;accent-color:var(--blue);cursor:pointer}
+  .small{font-size:11px;color:#8792a2;line-height:1.5}
+  input[type=number],select{width:100%;background:#fbfcfe;border:1px solid #d9e2ed;border-radius:8px;padding:10px;color:#2b394c;outline:none;font-variant-numeric:tabular-nums}
+  .tipline{display:flex;gap:10px;justify-content:space-between}
+  .tipline .btn{width:100%;font-weight:650}
+  details{border-top:1px solid var(--border);padding-top:14px}
+  summary{font-size:12px;font-weight:650;color:#59677a;cursor:pointer;user-select:none}
+  details p{font-size:12px;color:#66758b;line-height:1.6;margin:10px 0 2px}
+  .chartpanel{padding:16px 19px 16px}
+  .charthead{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .charthead h2{font-size:14px;margin:0;font-weight:670}
+  .legend{display:flex;gap:13px;flex-wrap:wrap;font-size:11px;color:#67758b}
+  .key{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px;position:relative;top:-1px}
+  canvas{display:block;width:100%;height:180px;margin-top:7px}
+  .footer-note{color:#8290a2;font-size:11px;line-height:1.6;max-width:860px;margin:0 3px}
+  @media(max-width:1040px){.layout{grid-template-columns:minmax(0,1fr) 220px}.wrap{padding:23px 18px}.lane{padding-left:14px;padding-right:14px}}
+  @media(max-width:800px){.layout{grid-template-columns:1fr}.controls{position:static;display:grid;grid-template-columns:1fr 1fr;align-items:start}.controls details{grid-column:1/-1}.head{align-items:flex-start}.clock{margin-right:0}.chartpanel{order:4}}
+  @media(max-width:510px){.wrap{padding:18px 10px 24px}.head{padding:0 5px}h1{font-size:22px}.lane{padding:12px 9px 10px}.slabel{font-size:16px}.rowstats{justify-content:flex-start}.controls{grid-template-columns:1fr 1fr;gap:13px;padding:14px}.control.seed{grid-column:2}.control-title{font-size:12px}.actions{gap:5px}.clock{min-width:100%;text-align:left}.btn{padding:9px 12px}.legend{gap:8px}.chartpanel{padding:14px 12px}.charthead h2{width:100%}}
+  @media(prefers-reduced-motion:reduce){.btn,.machine-box{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <h1>Buffers, blocking, and throughput</h1>
+    <div class="actions">
+      <span class="clock" id="clock">0 min</span>
+      <button class="btn primary" id="play">▶ Start</button>
+      <button class="btn" id="reset">↺ Reset</button>
+      <button class="btn" id="week" title="Simulate seven more days">+7 days</button>
+    </div>
+  </header>
+  <div class="layout">
+    <div class="main">
+      <article class="panel lane" id="lane-zero"><div class="lanehead"><h2>No buffers</h2><div class="value"><b id="ct-zero">—</b><span>min/unit</span></div></div><div class="drawing"></div><div class="rowstats" id="stats-zero"></div></article>
+      <article class="panel lane" id="lane-one"><div class="lanehead"><h2>Buffers of size 1</h2><div class="value"><b id="ct-one">—</b><span>min/unit</span></div></div><div class="drawing"></div><div class="rowstats" id="stats-one"></div></article>
+      <article class="panel lane" id="lane-inf"><div class="lanehead"><h2>Unlimited buffers</h2><div class="value"><b id="ct-inf">—</b><span>min/unit</span></div></div><div class="drawing"></div><div class="rowstats" id="stats-inf"></div></article>
+      <section class="panel chartpanel"><div class="charthead"><h2>Cycle time</h2><div class="legend"><span><i class="key" style="background:var(--slate)"></i>No buffers</span><span><i class="key" style="background:var(--blue)"></i>Size 1</span><span><i class="key" style="background:var(--teal)"></i>Unlimited</span></div></div><canvas id="chart" aria-label="Cycle time history for three buffer configurations"></canvas></section>
+      <p class="footer-note">Cycle time is the mean time between completed units. Longer runs reduce sampling noise.</p>
+    </div>
+    <aside class="panel controls">
+      <div class="control"><div class="control-title"><label for="cv">Service-time CV</label><output id="cvValue">1.0</output></div><input id="cv" type="range" min="0" max="3" step="0.1" value="1"></div>
+      <div class="control"><label class="control-title" for="speed">Speed</label><select id="speed"><option value="2">2 min/s</option><option value="10">10 min/s</option><option value="30" selected>30 min/s</option><option value="100">100 min/s</option><option value="300">300 min/s</option></select></div>
+      <div class="control seed"><label class="control-title" for="seed">Random seed</label><input id="seed" type="number" min="1" max="2147483647" step="1" value="2026"></div>
+    </aside>
+  </div>
+</div>
+<script>
+(()=>{'use strict';
+const MEAN=[6.5,7,6];
+const MODES=[{key:'zero',cap:0,color:'#78859a'},{key:'one',cap:1,color:'#436bd0'},{key:'inf',cap:Infinity,color:'#168d83'}];
+const xs=[95,420,745], mid=[324,649];
+const $=id=>document.getElementById(id);
+let cv=1, seed=2026, speed=30, running=false, lines=[], time=0, history=[], lastFrame=0, lastUi=0, nextCapture=0, raf=0, fast=false;
+const MAX_PULSES=12;
+const minMax=(n,a,b)=>Math.min(b,Math.max(a,n));
+const fmt=(x,d=1)=>Number.isFinite(x)?x.toFixed(d):'—';
+const num=(x)=>Number.isFinite(x)?Math.floor(x).toLocaleString('en-US'):'—';
+function hash(n){n=Math.imul(n^(n>>>16),0x7feb352d);n=Math.imul(n^(n>>>15),0x846ca68b);return (n^(n>>>16))>>>0;}
+function unitRandom(id,stage,salt){let x=(Math.imul(id+1,0x9e3779b1)^Math.imul(stage+5,0x85ebca6b)^Math.imul(salt+11,0xc2b2ae35)^seed)>>>0;return (hash(x)+.5)/4294967296;}
+function service(id,stage){if(cv===0)return MEAN[stage];const v=Math.log(1+cv*cv),z=Math.sqrt(-2*Math.log(unitRandom(id,stage,1)))*Math.cos(2*Math.PI*unitRandom(id,stage,2));return Math.max(.002,MEAN[stage]*Math.exp(Math.sqrt(v)*z-v/2));}
+function queue(){return {arr:[],head:0,get length(){return this.arr.length-this.head;},push(x){this.arr.push(x);},shift(){if(this.head>=this.arr.length)return null;const x=this.arr[this.head++];if(this.head>512&&this.head>this.arr.length/2){this.arr=this.arr.slice(this.head);this.head=0;}return x;}};}
+const idle=()=>({status:'idle',item:null,start:0,end:Infinity,duration:0});
+class ProductionLine{
+ constructor(config){this.key=config.key;this.cap=config.cap;this.color=config.color;this.t=0;this.m=[idle(),idle(),idle()];this.q=[queue(),queue()];this.next=0;this.done=0;this.firstOut=null;this.lastOut=null;this.wipArea=0;this.blockedArea=0;this.starvedArea=0;this.flowSum=0;this.pulses=[];this.startWork(0,this.newUnit(),0);}
+ newUnit(){return {id:this.next++,entry:this.t};}
+ startWork(stage,item,t){const d=service(item.id,stage);this.m[stage]={status:'processing',item,start:t,end:t+d,duration:d};}
+ emit(x1,x2){if(fast)return;const now=performance.now();this.pulses.push({x1,x2,birth:now});if(this.pulses.length>MAX_PULSES)this.pulses.shift();}
+ take(stage,item,t,x1){this.startWork(stage,item,t);this.emit(x1,xs[stage]+20);}
+ empty(stage){this.m[stage]=idle();}
+ integrate(dt){if(dt<=0)return;let w=0;for(const st of this.m)if(st.item)w++;w+=this.q[0].length+this.q[1].length;this.wipArea+=w*dt;this.blockedArea+=dt*((this.m[0].status==='blocked')+(this.m[1].status==='blocked'))/2;this.starvedArea+=dt*((this.m[1].status==='idle')+(this.m[2].status==='idle'))/2;}
+ finishEvent(t){this.integrate(t-this.t);this.t=t;
+   for(let j=0;j<3;j++){const s=this.m[j];if(s.status==='processing'&&s.end<=t+1e-10){s.status='blocked';s.end=Infinity;}}
+   // Stage 3 exits. A stage holds a finished unit if it cannot transfer.
+   if(this.m[2].status==='blocked'){
+     const item=this.m[2].item;this.done++;this.flowSum+=t-item.entry;if(this.firstOut===null)this.firstOut=t;this.lastOut=t;
+     this.empty(2);this.emit(xs[2]+130,952);
+   }
+   // Empty downstream machines take buffered work first; then direct transfers.
+   if(this.m[2].status==='idle'){
+     if(this.q[1].length){this.take(2,this.q[1].shift(),t,mid[1]);}
+     else if(this.m[1].status==='blocked'){const item=this.m[1].item;this.empty(1);this.take(2,item,t,xs[1]+130);}
+   }
+   if(this.m[1].status==='blocked'&&this.q[1].length<this.cap){this.q[1].push(this.m[1].item);this.empty(1);this.emit(xs[1]+130,mid[1]);}
+   if(this.m[1].status==='idle'){
+     if(this.q[0].length){this.take(1,this.q[0].shift(),t,mid[0]);}
+     else if(this.m[0].status==='blocked'){const item=this.m[0].item;this.empty(0);this.take(1,item,t,xs[0]+130);}
+   }
+   if(this.m[0].status==='blocked'&&this.q[0].length<this.cap){this.q[0].push(this.m[0].item);this.empty(0);this.emit(xs[0]+130,mid[0]);}
+   if(this.m[0].status==='idle'){this.startWork(0,this.newUnit(),t);this.emit(30,xs[0]+20);}
+ }
+ advance(target){let safety=0;while(true){const next=Math.min(this.m[0].end,this.m[1].end,this.m[2].end);if(next>target||!Number.isFinite(next))break;this.finishEvent(next);if(++safety>700000){throw new Error('Simulation event limit exceeded');}}
+  this.integrate(target-this.t);this.t=target;
+ }
+ cycle(){return this.done>=2?(this.lastOut-this.firstOut)/(this.done-1):NaN;}
+ throughput(){const c=this.cycle();return Number.isFinite(c)&&c>0?60/c:NaN;}
+ blockPct(){return this.t?100*this.blockedArea/this.t:0;}
+ starvePct(){return this.t?100*this.starvedArea/this.t:0;}
+ wip(){return this.t?this.wipArea/this.t:0;}
+ flow(){return this.done?this.flowSum/this.done:NaN;}
+}
+function svgFor(mode){
+ const arrow=`arrow-${mode.key}`;
+ let s=`<svg class="flow" viewBox="0 0 980 142" role="img" aria-label="Three workstations with ${mode.cap===Infinity?'unlimited':mode.cap} unit buffers"><defs><marker id="${arrow}" markerWidth="8" markerHeight="8" refX="5.5" refY="3.2" orient="auto"><path d="M0,0 L6,3.2 L0,6.4" stroke="#89a1cb" stroke-width="1.5" fill="none"/></marker></defs>`;
+ // The arrows and buffer shapes remain static; occupancy changes with the simulation.
+ s+=`<path class="transfer" d="M30 87 H90" marker-end="url(#${arrow})"/>`;
+ for(let j=0;j<2;j++){
+  const x0=xs[j]+134,x1=xs[j+1]-7,c=mid[j];
+  if(mode.cap===0){s+=`<path class="transfer" d="M${x0} 87 H${x1}" marker-end="url(#${arrow})"/>`;}
+  else{
+   s+=`<path class="transfer" d="M${x0} 87 H${c-43}" marker-end="url(#${arrow})"/><path class="transfer" d="M${c+43} 87 H${x1}" marker-end="url(#${arrow})"/>`;
+   s+=`<polygon class="buffer-shape" points="${c},40 ${c-36},111 ${c+36},111"/><text id="count-${mode.key}-${j}" x="${c}" y="95" class="buffer-count">0</text>`;
+  }
+ }
+ s+=`<path class="transfer" d="M${xs[2]+134} 87 H954" marker-end="url(#${arrow})"/>`;
+ for(let j=0;j<3;j++){
+  const x=xs[j];
+  s+=`<text class="slabel" x="${x+65}" y="24" text-anchor="middle">${MEAN[j]} min/unit</text>
+  <rect class="machine-box idle" id="box-${mode.key}-${j}" x="${x}" y="40" width="130" height="75" rx="8"/>
+  <text class="station-text" x="${x+65}" y="65" text-anchor="middle">Station ${j+1}</text>
+  <text class="station-small" id="state-${mode.key}-${j}" x="${x+65}" y="85" text-anchor="middle">${j===0?'Processing':'Starved'}</text>
+  <rect class="bar-bg" x="${x+12}" y="103" width="106" height="4" rx="2"/>
+  <rect class="bar-fg" id="bar-${mode.key}-${j}" x="${x+12}" y="103" width="0" height="4" rx="2"/>`;
+ }
+ s+=`<g id="pulses-${mode.key}"></g></svg>`;
+ return s;
+}
+function draw(){
+ $('clock').textContent=time<60?`${fmt(time,1)} min`:time<1440?`${fmt(time/60,1)} h`:`Day ${fmt(time/1440,1)}`;
+ for(const l of lines){
+  $("ct-"+l.key).textContent=fmt(l.cycle(),2);
+  $("stats-"+l.key).innerHTML=`<span><strong>${num(l.done)}</strong> completed</span><span><strong>${fmt(l.throughput(),2)}</strong> units/hour</span><span>Blocked <strong>${fmt(l.blockPct(),1)}%</strong></span><span>Starved <strong>${fmt(l.starvePct(),1)}%</strong></span><span>WIP <strong>${fmt(l.wip(),1)}</strong></span>`;
+  for(let j=0;j<3;j++){
+   const st=l.m[j],box=$(`box-${l.key}-${j}`),state=$(`state-${l.key}-${j}`),bar=$(`bar-${l.key}-${j}`);
+   box.setAttribute('class','machine-box '+st.status);
+   state.textContent=st.status==='processing'?`Unit ${st.item.id+1}`:st.status==='blocked'?`Blocked · ${st.item.id+1}`:'Starved';
+   bar.setAttribute('width',st.status==='processing'?String(106*minMax((l.t-st.start)/st.duration,0,1)):st.status==='blocked'?'106':'0');
+   bar.setAttribute('fill',st.status==='blocked'?'#d18b34':'#4a73d3');
+  }
+  if(l.cap!==0){for(let j=0;j<2;j++)$(`count-${l.key}-${j}`).textContent=l.q[j].length;}
+  const now=performance.now();l.pulses=l.pulses.filter(p=>now-p.birth<320);
+  $(`pulses-${l.key}`).innerHTML=l.pulses.map(p=>{const u=minMax((now-p.birth)/320,0,1),e=1-Math.pow(1-u,2),x=p.x1+(p.x2-p.x1)*e;return `<circle cx="${x.toFixed(1)}" cy="87" r="5.5" fill="${l.color}" opacity="${Math.sin(Math.PI*u).toFixed(2)}"/>`;}).join('');
+ }
+ plot();
+}
+function capture(){if(!lines.some(l=>l.done>=2))return;history.push({t:time,values:lines.map(l=>l.cycle())});if(history.length>270)history=history.filter((_,i)=>i%2===0);}
+function stepAll(target,doCapture=false){for(const l of lines)l.advance(target);time=target;if(doCapture)capture();}
+function runDays(){const was=running;if(was)pause();fast=true;try{const target=time+7*1440,base=time;for(let i=1;i<=120;i++)stepAll(base+(target-base)*i/120,true);}finally{fast=false;}draw();if(was)start();}
+function reset(){pause();time=0;history=[];nextCapture=30;cv=Number($('cv').value);seed=minMax(Math.floor(Number($('seed').value)||2026),1,2147483647);$('seed').value=seed;speed=Number($('speed').value);$('cvValue').textContent=fmt(cv,1);lines=MODES.map(m=>new ProductionLine(m));draw();}
+function frame(now){if(!running)return;const dt=minMax((now-lastFrame)/1000,0,.09);lastFrame=now;stepAll(time+dt*speed);if(time>=nextCapture){capture();nextCapture=time+Math.max(15,speed*1.2);}if(now-lastUi>65){draw();lastUi=now;}raf=requestAnimationFrame(frame);}
+function start(){if(running)return;running=true;lastFrame=performance.now();lastUi=0;$('play').textContent='Ⅱ Pause';raf=requestAnimationFrame(frame);}
+function pause(){running=false;if(raf)cancelAnimationFrame(raf);raf=0;$('play').textContent=time>0?'▶ Resume':'▶ Start';}
+function plot(){const canvas=$('chart'),rect=canvas.getBoundingClientRect();if(!rect.width)return;const dpr=Math.min(window.devicePixelRatio||1,2),w=rect.width,h=180;canvas.width=Math.round(w*dpr);canvas.height=h*dpr;const c=canvas.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);
+ const margin={l:38,r:12,t:13,b:25},W=w-margin.l-margin.r,H=h-margin.t-margin.b;
+ const valid=history.flatMap(v=>v.values.filter(Number.isFinite));const maxObs=Math.max(12,...valid.slice(-150));const ymin=0,ymax=Math.min(45,Math.max(12,Math.ceil(maxObs/2)*2));
+ c.lineWidth=1;c.font='11px system-ui';c.textBaseline='middle';c.textAlign='right';for(let i=0;i<=4;i++){const v=ymax*i/4,y=margin.t+H-v/ymax*H;c.strokeStyle='#edf0f5';c.beginPath();c.moveTo(margin.l,y);c.lineTo(w-margin.r,y);c.stroke();c.fillStyle='#8a97a8';c.fillText(fmt(v,0),margin.l-8,y);}
+ const maxT=Math.max(120,time),xmin=0;const tx=t=>margin.l+(t-xmin)/maxT*W;const ty=v=>margin.t+H-minMax(v,0,ymax)/ymax*H;
+ c.textAlign='center';c.textBaseline='top';c.fillStyle='#8a97a8';for(let i=0;i<=4;i++){let t=maxT*i/4;c.fillText(maxT<1440?fmt(t/60,1)+'h':fmt(t/1440,1)+'d',tx(t),h-20);}
+ for(let j=0;j<3;j++){c.strokeStyle=MODES[j].color;c.lineWidth=2.2;c.lineCap='round';c.lineJoin='round';c.beginPath();let begun=false;
+  for(const p of history){const y=p.values[j];if(!Number.isFinite(y)){begun=false;continue;}const x=tx(p.t);if(!begun){c.moveTo(x,ty(y));begun=true;}else c.lineTo(x,ty(y));}c.stroke();}
+ if(history.length===0){c.fillStyle='#a0abba';c.font='12px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText('Run the line to see cycle times',margin.l+W/2,margin.t+H/2);}
+}
+for(const mode of MODES)$('lane-'+mode.key).querySelector('.drawing').innerHTML=svgFor(mode);
+$('play').addEventListener('click',()=>running?pause():start());$('reset').addEventListener('click',reset);$('week').addEventListener('click',runDays);
+$('cv').addEventListener('input',()=>{$('cvValue').textContent=fmt(Number($('cv').value),1);reset();});
+$('seed').addEventListener('change',reset);$('speed').addEventListener('change',()=>{speed=Number($('speed').value);});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)pause();});
+window.addEventListener('resize',()=>plot());
+reset();
+})();
+</script>
+</body>
+</html>
