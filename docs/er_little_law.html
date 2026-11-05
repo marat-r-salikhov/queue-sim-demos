@@ -18,8 +18,6 @@
 .stats-table td.sim-value{color:var(--ink)}
 .stats-table td.law-value{color:var(--teal);font-weight:650}
 .panel-title-inline{font-size:13.75px;color:var(--muted);font-variant-numeric:tabular-nums}
-.small-rule{font-size:14.375px;color:var(--muted);line-height:1.5;padding-top:12px;border-top:1px solid var(--border);margin-top:12px}
-.small-rule strong{color:var(--ink)}
 .field.spaced{padding-top:8px}
 @media(max-width:650px){.stats-table th,.stats-table td{padding:8px 9px}.stats-table th:first-child,.stats-table td:first-child{min-width:150px}}
 </style></head>
@@ -78,12 +76,8 @@
         <div class="field span2"><label for="docCV" title="Service-time coefficient of variation conditional on prescription or admission">Doctor CV (within type)</label><input id="docCV" type="number" min="0" max="5" step="0.01" value="1.56"></div>
         <div class="field span2"><label for="seed">Random seed</label><input id="seed" type="number" min="1" max="4294967295" step="1" value="12345"></div>
       </div>
-      <div class="small-rule" id="capacityText"></div>
     </section>
-    <section class="panel pad notes">
-      <details><summary>Model assumptions</summary><p>Arrivals and service durations follow gamma distributions with the stated means. CV = standard deviation / mean; higher CV creates more uneven arrivals or longer service-time tails. The doctor CV applies within each patient type; mixing 5-minute prescriptions and 30-minute admissions adds further variability. Two clerks and seven doctors serve patients in FIFO order, starting the next patient immediately upon becoming free. The simulation uses a 30-day warm-up. The default CVs were calibrated across 12 year-long runs to produce waiting queues near 30 and 40; the exercise does not determine these CVs uniquely. Queue lengths and waits are never imposed.</p></details>
-      <div id="errorBox" role="alert"></div>
-    </section>
+    <div id="errorBox" role="alert"></div>
   </aside>
 </div>
 </main>
@@ -107,8 +101,6 @@ function config(){return {
   docCV:clamp($('docCV').value,0,5,1.56),seed:Math.floor(clamp($('seed').value,1,4294967295,12345)),
   duration:60*Number($('duration').value)
 };}
-function utilization(c){const docMean=(1-c.admitPct)*c.rxMin+c.admitPct*c.admitMin;
-  return {reg:c.rate*c.regMin/(60*c.registrars),doc:c.rate*docMean/(60*c.doctors)};}
 function makeRng(seed){let s=seed>>>0;return()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return(s+.5)/4294967296;};}
 function normal(rng){const a=Math.max(1e-12,rng()),b=rng();return Math.sqrt(-2*Math.log(a))*Math.cos(2*Math.PI*b);}
 function gamma(k,rng){if(k<1)return gamma(k+1,rng)*Math.pow(Math.max(1e-12,rng()),1/k);
@@ -221,16 +213,13 @@ function drawChart(){if(!state)return;const canvas=$('lawChart'),r=canvas.getBou
   ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=2.4;ctx.lineJoin='round';
   let first=true;for(const p of pts){if(!Number.isFinite(p[key])){first=true;continue;}
    if(first){ctx.moveTo(px(p.t),py(p[key]));first=false;}else ctx.lineTo(px(p.t),py(p[key]));}ctx.stroke();}}
-function render(){if(!state)return;const o=observed(state),u=utilization(state.c);
+function render(){if(!state)return;const o=observed(state);
  $('liveRate').textContent=o?fmt(o.totalRate,1):'';
  $('liveL').textContent=o?fmt(o.totalL,2):'';$('liveW').textContent=o?fmt(o.totalW,1):'';
  $('timeLabel').textContent=fmt(state.time/1440,1)+' / '+fmt(state.maxTime/1440,0)+' days';
  $('progressFill').style.width=100*state.time/state.maxTime+'%';
  $('startBtn').textContent=state.done?'Completed':running?'Pause':state.time>0?'Resume':'Start';
  $('startBtn').disabled=state.done;$('finishBtn').disabled=state.done;
- const overload=u.reg>=1||u.doc>=1;
- $('capacityText').innerHTML='<strong>Worker utilization</strong> · registration '+fmt(u.reg*100,1)+'% · doctors '+fmt(u.doc*100,1)+'%'+
- (overload?'<div style="color:#a85835;margin-top:5px">At least one queue is unstable at this arrival rate.</div>':'');
  drawDots();drawTable();drawChart();}
 function pause(){running=false;if(raf!==null){cancelAnimationFrame(raf);raf=null;}if(state)render();}
 function frame(now){if(!running)return;const dt=Math.min(.15,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
